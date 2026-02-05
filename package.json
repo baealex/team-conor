@@ -1,0 +1,42 @@
+{
+  "name": "team-conor",
+  "version": "1.0.0",
+  "description": "AI 코딩 어시스턴트를 위한 팀 페르소나 시스템 - 체크리스트 기반 코드 리뷰",
+  "type": "module",
+  "bin": {
+    "team-conor": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "persona",
+    "team",
+    "code-review",
+    "developer-tools",
+    "productivity"
+  ],
+  "author": "baealex",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baealex/team-conor.git"
+  },
+  "homepage": "https://github.com/baealex/team-conor#readme",
+  "bugs": {
+    "url": "https://github.com/baealex/team-conor/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  }
+}
