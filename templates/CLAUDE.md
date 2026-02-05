@@ -26,16 +26,9 @@
 </personas>
 
 <memory-system>
-    <summary file=".conor/memory/summary.md">
-        <!--
-        이 섹션은 Claude가 자동으로 업데이트합니다.
-        핵심 컨텍스트만 유지하고, 상세 내용은 .conor/memory/ 파일들에 기록합니다.
-        -->
-    </summary>
-
     <files>
         .conor/memory/
-        ├── summary.md      # 핵심 컨텍스트 요약 (이 파일에서 참조)
+        ├── summary.md      # 핵심 컨텍스트 요약 (항상 참조)
         ├── project.md      # 기술 스택, 아키텍처, 컨벤션
         ├── decisions.md    # 주요 결정 사항과 근거
         ├── learnings.md    # 발견한 패턴, 버그, 해결책
@@ -43,14 +36,9 @@
     </files>
 
     <rules>
-        <write>
-            - 기술적 결정, 버그 해결, 프로젝트 패턴 발견 시 기록
-            - 상세 내용 → .conor/memory/*.md
-            - 핵심 요약 → .conor/memory/summary.md 업데이트
-        </write>
-        <format>
-            - [YYYY-MM-DD] 날짜 포함
-            - 간결하게, 검색 가능한 키워드
-        </format>
+        - 기술적 결정, 버그 해결, 프로젝트 패턴 발견 시 기록
+        - 상세 내용 → .conor/memory/*.md
+        - 핵심 요약 → .conor/memory/summary.md 업데이트
+        - 형식: [YYYY-MM-DD] 날짜 포함, 간결하게
     </rules>
 </memory-system>
