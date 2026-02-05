@@ -1,0 +1,28 @@
+{
+  "name": "team-conor",
+  "version": "1.0.0",
+  "description": "Claude Code용 팀 페르소나 설정 도구",
+  "type": "module",
+  "bin": {
+    "team-conor": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "persona",
+    "team"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  }
+}
