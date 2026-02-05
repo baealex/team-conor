@@ -97,6 +97,23 @@ CLAUDE.md                    # AI 설정 파일
 - 프로젝트에 맞는 기술 스택 반영
 - 팀 컨벤션 추가
 
+## 배포 (Maintainer용)
+
+```bash
+# npm 로그인
+npm login
+
+# 배포 전 확인
+npm pack --dry-run
+
+# 배포
+npm publish
+
+# 버전 올리기 (patch/minor/major)
+npm version patch
+npm publish
+```
+
 ## 라이선스
 
 MIT
