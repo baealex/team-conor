@@ -42,9 +42,24 @@
     </files>
 
     <rules>
-        - 기술적 결정, 버그 해결, 프로젝트 패턴 발견 시 기록
-        - 상세 내용 → .conor/memory/*.md
-        - 핵심 요약 → .conor/memory/summary.md 업데이트
-        - 형식: [YYYY-MM-DD] 날짜 포함, 간결하게
+        <when-to-write>
+            다음 상황이 발생하면 반드시 memory에 기록한다:
+            - 기술 스택, 라이브러리, 아키텍처를 선택하거나 변경했을 때 → decisions.md
+            - 버그를 해결했을 때 (원인 + 해결책) → learnings.md
+            - 반복될 수 있는 패턴이나 컨벤션을 발견했을 때 → learnings.md
+            - 프로젝트 구조, 빌드, 배포 관련 정보가 확인되었을 때 → project.md
+            - 세션에서 중요한 맥락이 생겼을 때 → summary.md
+        </when-to-write>
+        <how-to-write>
+            - 형식: [YYYY-MM-DD] 날짜 포함, 간결하게
+            - 상세 내용 → .conor/memory/*.md 에 추가 (append, 기존 내용 유지)
+            - 핵심 요약 → .conor/memory/summary.md 업데이트
+            - 하나의 항목은 2-3줄 이내로, 나중에 읽었을 때 맥락을 복원할 수 있을 정도면 충분
+        </how-to-write>
+        <priority>
+            - 작업이 끝나면 "기록할 것이 있는가?"를 스스로 점검한다
+            - 기록하지 않으면 다음 세션에서 같은 삽질을 반복하게 된다는 점을 인지한다
+            - 사용자가 기록을 요청하지 않아도, 위 조건에 해당하면 자동으로 기록한다
+        </priority>
     </rules>
 </memory-system>
