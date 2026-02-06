@@ -10,6 +10,26 @@ AI 코딩 어시스턴트를 위한 팀 페르소나 시스템입니다.
 npx team-conor
 ```
 
+### CLI 옵션
+
+```bash
+# 대화형 설정 (기본)
+npx team-conor init
+
+# 비대화형 모드 (CI/CD 등 인터렉션 불가 환경)
+npx team-conor init --name "홍길동" --no-interaction
+
+# 기존 파일 강제 덮어쓰기
+npx team-conor init --name "홍길동" -y
+
+# 도움말
+npx team-conor --help
+npx team-conor init --help
+
+# 버전 확인
+npx team-conor --version
+```
+
 ## 생성되는 파일
 
 ```
@@ -96,23 +116,6 @@ CLAUDE.md                    # AI 설정 파일
 - 체크리스트 항목 추가/수정
 - 프로젝트에 맞는 기술 스택 반영
 - 팀 컨벤션 추가
-
-## 배포 (Maintainer용)
-
-```bash
-# npm 로그인
-npm login
-
-# 배포 전 확인
-npm pack --dry-run
-
-# 배포
-npm publish
-
-# 버전 올리기 (patch/minor/major)
-npm version patch
-npm publish
-```
 
 ## 라이선스
 
