@@ -1,3 +1,5 @@
+[English](./README.en.md) | [日本語](./README.ja.md)
+
 # Team Conor
 
 AI 코딩 어시스턴트(Claude)를 위한 팀 페르소나 시스템입니다.
@@ -21,6 +23,9 @@ npx team-conor
 ```bash
 # 대화형 설정 (기본)
 npx team-conor init
+
+# 언어 선택 (ko, en, ja)
+npx team-conor init --lang ko
 
 # 비대화형 모드 (CI/CD 등 인터렉션 불가 환경)
 npx team-conor init --name "홍길동" --no-interaction
