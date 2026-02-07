@@ -81,6 +81,8 @@ export async function run(options: InitOptions): Promise<void> {
 
   ensureDir(path.join(cwd, '.conor', 'persona'));
   ensureDir(path.join(cwd, '.conor', 'memory'));
+  ensureDir(path.join(cwd, '.conor', 'memory', '_schema'));
+  ensureDir(path.join(cwd, '.conor', 'memory', 'chunks'));
 
   const writeOpts = {
     alwaysAsk: isUpdate && options.interaction,
@@ -110,39 +112,45 @@ export async function run(options: InitOptions): Promise<void> {
   logger.newline();
   logger.info(msg.memoryFiles);
 
-  const memoryFiles = ['project.md', 'decisions.md', 'learnings.md'];
+  // Schema files (format definitions for chunk creation)
+  const schemaFiles = ['learning.md', 'decision.md', 'project.md'];
 
-  for (const file of memoryFiles) {
-    const src = path.join(langTemplatesDir, 'memory', file);
-    const dest = path.join(cwd, '.conor', 'memory', file);
+  for (const file of schemaFiles) {
+    const src = path.join(langTemplatesDir, 'memory', '_schema', file);
+    const dest = path.join(cwd, '.conor', 'memory', '_schema', file);
     const content = fs.readFileSync(src, 'utf-8');
-    await writeFileWithConfirm(dest, content, { isMemory: true });
+    await writeFileWithConfirm(dest, content, writeOpts);
   }
 
+  // Summary (Zettelkasten index — always loaded into AI context)
   const summaryPath = path.join(cwd, '.conor', 'memory', 'summary.md');
   if (!fs.existsSync(summaryPath)) {
-    const summaryContent = `# Memory Summary
+    const summaryContent = `# Memory Index
 
 <!--
 ${msg.summaryComment1}
 ${msg.summaryComment2}
 ${msg.summaryComment3}
+${msg.summaryComment4}
 -->
 
 ## Project
 ${msg.summaryProject}
 
-## Recent Decisions
+## Decisions
 ${msg.summaryDecisions}
 
-## Active Context
-${msg.summaryActive}
+## Learnings
+${msg.summaryLearnings}
 `;
     fs.writeFileSync(summaryPath, summaryContent);
     logger.success(`  ${msg.summaryCreated}`);
   } else {
     logger.warn(`  ${msg.summaryKept}`);
   }
+
+  // Chunks directory info
+  logger.success(`  ${msg.chunksReady}`);
 
   logger.newline();
   logger.info(msg.claudeMd);

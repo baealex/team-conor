@@ -1,6 +1,6 @@
 <context>
     <user name="{{userName}}" file=".conor/persona/user.md"/>
-    <memory summary=".conor/memory/summary.md" detail=".conor/memory/"/>
+    <memory summary=".conor/memory/summary.md" chunks=".conor/memory/chunks/"/>
 </context>
 
 <personas>
@@ -32,34 +32,74 @@
 </personas>
 
 <memory-system>
-    <files>
-        .conor/memory/
-        ├── summary.md      # コアコンテキストの要約（常に参照）
-        ├── project.md      # 技術スタック、アーキテクチャ、コンベンション
-        ├── decisions.md    # 主要な意思決定とその根拠
-        ├── learnings.md    # 発見したパターン、バグ、解決策
-        └── [topic].md      # トピック別の詳細内容
-    </files>
+    <!--
+    Zettelkasten ベースのメモリシステム
+    - summary.md: 常にコンテキストにロードされるインデックス（最小トークン）
+    - chunks/: 個別のアトミックノート（必要時のみ参照）
+    - スキーマファイル: 新しいchunk作成時に参照するフォーマット定義
+    -->
 
-    <rules>
-        <when-to-write>
-            以下の状況が発生したら必ずmemoryに記録する：
-            - 技術スタック、ライブラリ、アーキテクチャを選択または変更した時 → decisions.md
-            - バグを解決した時（原因 + 解決策） → learnings.md
-            - 繰り返し得るパターンやコンベンションを発見した時 → learnings.md
-            - プロジェクト構造、ビルド、デプロイ関連の情報が確認された時 → project.md
-            - セッションで重要なコンテキストが生まれた時 → summary.md
-        </when-to-write>
-        <how-to-write>
-            - 形式：[YYYY-MM-DD] 日付を含め、簡潔に
-            - 詳細内容 → .conor/memory/*.md に追記（append、既存内容は保持）
-            - コア要約 → .conor/memory/summary.md を更新
-            - 一つの項目は2〜3行以内で、後から読んだ時にコンテキストを復元できる程度で十分
-        </how-to-write>
-        <priority>
-            - 作業が終わったら「記録すべきことはあるか？」を自ら点検する
-            - 記録しなければ次のセッションで同じ試行錯誤を繰り返すことになると認識する
-            - ユーザーが記録を依頼しなくても、上記の条件に該当すれば自動的に記録する
-        </priority>
-    </rules>
+    <structure>
+        .conor/memory/
+        ├── summary.md          # インデックス（常にロード — コンテキスト最適化必須）
+        ├── _schema/
+        │   ├── learning.md     # 学習/パターン/バグ chunk フォーマット
+        │   ├── decision.md     # 意思決定 chunk フォーマット
+        │   └── project.md      # プロジェクトコンテキスト chunk フォーマット
+        └── chunks/             # アトミックノートストレージ
+            ├── L-YYYYMMDD-slug.md
+            ├── D-YYYYMMDD-slug.md
+            └── P-YYYYMMDD-slug.md
+    </structure>
+
+    <summary-rules>
+        summary.mdはメモリシステムのエントリポイントである。以下のルールを厳守する：
+
+        1. 形式: 各項目は1行、chunkファイルへの参照を含む
+           - `- [ID](chunks/ID.md) 一行要約 | #タグ1 #タグ2`
+        2. グループ: Project, Decisions, Learnings セクションで区分
+        3. サイズ制限: 最大30項目を維持
+           - 超過時: 最も古く関連性の低い項目を削除
+           - 削除された項目のchunkファイルは削除しない（検索でアクセス可能）
+        4. 厳禁: summary.mdに詳細内容を直接記載しない
+           - 詳細内容は必ずchunkファイルにのみ記録する
+    </summary-rules>
+
+    <chunk-rules>
+        chunkは一つのテーマに関するアトミックノートである：
+
+        1. ファイル名: `{タイプ}-{YYYYMMDD}-{英語slug}.md`
+           - タイプ: L（学習）, D（決定）, P（プロジェクト）
+           - 例: `L-20250207-ssr-hydration-fix.md`
+        2. フォーマット: スキーマファイル(.conor/memory/_schema/*.md)を参照して作成
+        3. 分量: 要点のみ、10行以内で記述
+        4. リンク: 関連chunkがあれば `refs: [ID1, ID2]` で接続
+        5. 1つのchunk = 1つのテーマ（複数テーマを1つに混在させない）
+    </chunk-rules>
+
+    <when-to-write>
+        以下の状況が発生したら必ずchunkを作成しsummaryを更新する：
+        - 技術スタック、ライブラリ、アーキテクチャを選択または変更した時 → D-chunk
+        - バグを解決した時（原因 + 解決策） → L-chunk
+        - 繰り返し得るパターンやコンベンションを発見した時 → L-chunk
+        - プロジェクト構造、ビルド、デプロイ関連の情報が確認された時 → P-chunk
+    </when-to-write>
+
+    <context-optimization>
+        コンテキストウィンドウを最小限に使用するための戦略：
+
+        1. セッション開始: summary.mdのみ読む（全chunksを読まない）
+        2. 必要時: summaryの参照を通じて特定のchunkのみ開いて読む
+        3. 記録時: chunkファイル作成 → summaryに1行の参照を追加
+        4. 整理時: summaryが30項目を超えたら古い項目の参照を削除
+           - chunkファイル自体は保存（後で検索可能）
+        5. 検索時: 特定テーマが必要なときはchunks/ディレクトリでファイル名/タグで検索
+    </context-optimization>
+
+    <priority>
+        - 作業が終わったら「記録すべきことはあるか？」を自ら点検する
+        - 記録しなければ次のセッションで同じ試行錯誤を繰り返すことになると認識する
+        - ユーザーが記録を依頼しなくても、上記の条件に該当すれば自動的に記録する
+        - summary.mdのサイズを常に意識し、不要な内容が残っていないか点検する
+    </priority>
 </memory-system>
