@@ -3,6 +3,7 @@ import path from 'path';
 import prompts from 'prompts';
 import { log } from './logger.js';
 import { showDiff } from './diff.js';
+import { t } from '../locales/index.js';
 
 export interface WriteOptions {
   alwaysAsk?: boolean;
@@ -16,34 +17,35 @@ export async function writeFileWithConfirm(
   options: WriteOptions = {},
 ): Promise<void> {
   const { alwaysAsk = true, isMemory = false, force = false } = options;
+  const msg = t();
 
   if (fs.existsSync(filePath)) {
     const oldContent = fs.readFileSync(filePath, 'utf-8');
 
     if (oldContent === content) {
-      log(`  - ${path.basename(filePath)} (변경 없음)`, 'dim');
+      log(`  - ${path.basename(filePath)} (${msg.noChange})`, 'dim');
       return;
     }
 
     if (isMemory) {
-      log(`  - ${path.basename(filePath)} (기존 유지 - memory)`, 'yellow');
+      log(`  - ${path.basename(filePath)} (${msg.keepMemory})`, 'yellow');
       return;
     }
 
     if (force) {
-      // Non-interactive: 강제 덮어쓰기
+      // Non-interactive: force overwrite
     } else if (alwaysAsk) {
       const action = await confirmOverwrite(path.basename(filePath), oldContent, content);
 
       if (action === 'skip') {
-        log(`  - ${path.basename(filePath)} (건너뜀)`, 'yellow');
+        log(`  - ${path.basename(filePath)} (${msg.skipped})`, 'yellow');
         return;
       }
 
       if (action === 'backup') {
         const backupPath = `${filePath}.backup`;
         fs.writeFileSync(backupPath, oldContent);
-        log(`  - ${path.basename(filePath)}.backup (백업 생성)`, 'dim');
+        log(`  - ${path.basename(filePath)}.backup (${msg.backupCreated})`, 'dim');
       }
     }
   }
@@ -57,16 +59,17 @@ async function confirmOverwrite(
   oldContent: string,
   newContent: string,
 ): Promise<string> {
+  const msg = t();
   showDiff(oldContent, newContent, filePath);
 
   const response = await prompts({
     type: 'select',
     name: 'action',
-    message: `${filePath} 파일이 이미 존재합니다`,
+    message: `${filePath} ${msg.fileExists}`,
     choices: [
-      { title: '덮어쓰기', value: 'overwrite' },
-      { title: '건너뛰기', value: 'skip' },
-      { title: '백업 후 덮어쓰기', value: 'backup' },
+      { title: msg.overwrite, value: 'overwrite' },
+      { title: msg.skip, value: 'skip' },
+      { title: msg.backupAndOverwrite, value: 'backup' },
     ],
   });
 
