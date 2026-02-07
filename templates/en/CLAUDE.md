@@ -1,6 +1,6 @@
 <context>
     <user name="{{userName}}" file=".conor/persona/user.md"/>
-    <memory summary=".conor/memory/summary.md" detail=".conor/memory/"/>
+    <memory summary=".conor/memory/summary.md" chunks=".conor/memory/chunks/"/>
 </context>
 
 <personas>
@@ -32,34 +32,74 @@
 </personas>
 
 <memory-system>
-    <files>
-        .conor/memory/
-        ├── summary.md      # Core context summary (always referenced)
-        ├── project.md      # Tech stack, architecture, conventions
-        ├── decisions.md    # Key decisions and rationale
-        ├── learnings.md    # Discovered patterns, bugs, solutions
-        └── [topic].md      # Detailed content by topic
-    </files>
+    <!--
+    Zettelkasten-based memory system
+    - summary.md: Index always loaded into context (minimal tokens)
+    - chunks/: Individual atomic notes (referenced only when needed)
+    - Schema files: Format definitions referenced when creating new chunks
+    -->
 
-    <rules>
-        <when-to-write>
-            Always record to memory when the following situations occur:
-            - When a tech stack, library, or architecture is chosen or changed -> decisions.md
-            - When a bug is resolved (cause + solution) -> learnings.md
-            - When a reusable pattern or convention is discovered -> learnings.md
-            - When project structure, build, or deployment information is confirmed -> project.md
-            - When important context emerges during a session -> summary.md
-        </when-to-write>
-        <how-to-write>
-            - Format: include [YYYY-MM-DD] date, keep it concise
-            - Detailed content -> append to .conor/memory/*.md (append only, preserve existing content)
-            - Core summary -> update .conor/memory/summary.md
-            - Each entry should be 2-3 lines max -- just enough to restore context when read later
-        </how-to-write>
-        <priority>
-            - After completing work, self-check: "Is there anything to record?"
-            - Recognize that failing to record means repeating the same mistakes in the next session
-            - Record automatically when the above conditions are met, even if the user does not request it
-        </priority>
-    </rules>
+    <structure>
+        .conor/memory/
+        ├── summary.md          # Index (always loaded — context optimization required)
+        ├── _schema/
+        │   ├── learning.md     # Learning/pattern/bug chunk format
+        │   ├── decision.md     # Decision chunk format
+        │   └── project.md      # Project context chunk format
+        └── chunks/             # Atomic note storage
+            ├── L-YYYYMMDD-slug.md
+            ├── D-YYYYMMDD-slug.md
+            └── P-YYYYMMDD-slug.md
+    </structure>
+
+    <summary-rules>
+        summary.md is the entry point of the memory system. Follow these rules strictly:
+
+        1. Format: Each entry is one line with a chunk file reference
+           - `- [ID](chunks/ID.md) one-line-summary | #tag1 #tag2`
+        2. Groups: Organize into Project, Decisions, Learnings sections
+        3. Size limit: Maintain a maximum of 30 entries
+           - When exceeded: remove the oldest and least relevant entries
+           - Removed entries' chunk files are NOT deleted (still searchable)
+        4. Strictly prohibited: Never write detailed content directly in summary.md
+           - Detailed content must only be recorded in chunk files
+    </summary-rules>
+
+    <chunk-rules>
+        A chunk is an atomic note about a single topic:
+
+        1. Filename: `{type}-{YYYYMMDD}-{slug}.md`
+           - Types: L (learning), D (decision), P (project)
+           - Example: `L-20250207-ssr-hydration-fix.md`
+        2. Format: Follow the schema files (.conor/memory/_schema/*.md)
+        3. Length: Keep to the essentials, 10 lines or fewer
+        4. Links: Connect related chunks with `refs: [ID1, ID2]`
+        5. One chunk = one topic (never mix multiple topics in one chunk)
+    </chunk-rules>
+
+    <when-to-write>
+        Create a chunk and update summary whenever:
+        - A tech stack, library, or architecture is chosen or changed -> D-chunk
+        - A bug is resolved (cause + solution) -> L-chunk
+        - A reusable pattern or convention is discovered -> L-chunk
+        - Project structure, build, or deployment info is confirmed -> P-chunk
+    </when-to-write>
+
+    <context-optimization>
+        Strategy to minimize context window usage:
+
+        1. Session start: Read only summary.md (never read all chunks)
+        2. When needed: Open specific chunks via summary references
+        3. When recording: Create chunk file -> add one-line reference to summary
+        4. When pruning: Remove oldest entries from summary when exceeding 30 items
+           - Chunk files themselves are preserved (searchable later)
+        5. When searching: Look up chunks/ directory by filename/tags when a specific topic is needed
+    </context-optimization>
+
+    <priority>
+        - After completing work, self-check: "Is there anything to record?"
+        - Recognize that failing to record means repeating the same mistakes in the next session
+        - Record automatically when the above conditions are met, even if the user does not request it
+        - Always be mindful of summary.md size, and check for unnecessary entries
+    </priority>
 </memory-system>

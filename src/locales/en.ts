@@ -42,13 +42,17 @@ export const en: Messages = {
   diffNew: 'new version',
   diffMoreLines: (count: number) => `${count} more lines`,
 
-  // summary.md
-  summaryComment1: 'This file is referenced from CLAUDE.md.',
-  summaryComment2: 'Keep the core project context concise.',
-  summaryComment3: 'Record details in other memory files.',
-  summaryProject: '<!-- Tech stack, architecture summary -->',
-  summaryDecisions: '<!-- Recent key decisions -->',
-  summaryActive: '<!-- Current work in progress -->',
-  summaryCreated: '+ summary.md',
+  // summary.md (Zettelkasten index)
+  summaryComment1: 'Zettelkasten-based memory index',
+  summaryComment2: 'This file is always loaded into AI context. Keep it minimal.',
+  summaryComment3: 'Each entry is one line, referencing detailed files in chunks/ directory.',
+  summaryComment4: 'Format: - [ID](chunks/ID.md) summary | #tags',
+  summaryProject: '<!-- Add project info references in [P-ID](chunks/P-ID.md) format -->',
+  summaryDecisions: '<!-- Add decision references in [D-ID](chunks/D-ID.md) format -->',
+  summaryLearnings: '<!-- Add learning references in [L-ID](chunks/L-ID.md) format -->',
+  summaryCreated: '+ summary.md (Zettelkasten index)',
   summaryKept: '- summary.md (kept)',
+
+  // chunks
+  chunksReady: '+ chunks/ (atomic notes directory)',
 };

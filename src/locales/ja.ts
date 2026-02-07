@@ -42,13 +42,17 @@ export const ja: Messages = {
   diffNew: '新バージョン',
   diffMoreLines: (count: number) => `他${count}行`,
 
-  // summary.md
-  summaryComment1: 'このファイルはCLAUDE.mdから参照されます。',
-  summaryComment2: 'プロジェクトのコアコンテキストを簡潔に保ってください。',
-  summaryComment3: '詳細は他のmemoryファイルに記録してください。',
-  summaryProject: '<!-- 技術スタック、アーキテクチャ概要 -->',
-  summaryDecisions: '<!-- 最近の主要な決定事項 -->',
-  summaryActive: '<!-- 現在作業中の内容 -->',
-  summaryCreated: '+ summary.md',
+  // summary.md (Zettelkasten index)
+  summaryComment1: 'Zettelkastenベースのメモリインデックス',
+  summaryComment2: 'このファイルは常にAIコンテキストにロードされます。最小限に保ってください。',
+  summaryComment3: '各項目は1行で、chunks/ディレクトリの詳細ファイルを参照します。',
+  summaryComment4: '形式: - [ID](chunks/ID.md) 要約 | #タグ',
+  summaryProject: '<!-- [P-ID](chunks/P-ID.md) 形式でプロジェクト情報の参照を追加 -->',
+  summaryDecisions: '<!-- [D-ID](chunks/D-ID.md) 形式で決定事項の参照を追加 -->',
+  summaryLearnings: '<!-- [L-ID](chunks/L-ID.md) 形式で学習内容の参照を追加 -->',
+  summaryCreated: '+ summary.md (Zettelkasten index)',
   summaryKept: '- summary.md (既存維持)',
+
+  // chunks
+  chunksReady: '+ chunks/ (atomic notes directory)',
 };

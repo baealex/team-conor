@@ -40,15 +40,19 @@ export interface Messages {
   diffNew: string;
   diffMoreLines: (count: number) => string;
 
-  // summary.md
+  // summary.md (Zettelkasten index)
   summaryComment1: string;
   summaryComment2: string;
   summaryComment3: string;
+  summaryComment4: string;
   summaryProject: string;
   summaryDecisions: string;
-  summaryActive: string;
+  summaryLearnings: string;
   summaryCreated: string;
   summaryKept: string;
+
+  // chunks
+  chunksReady: string;
 }
 
 export type Locale = 'ko' | 'en' | 'ja';
