@@ -24,9 +24,6 @@ export const ko: Messages = {
   optionForce: '기존 파일을 묻지 않고 덮어쓰기',
   optionNoInteraction: '비대화형 모드 (CI/CD 등)',
 
-  // language selection
-  selectLanguage: '언어를 선택하세요',
-
   // file utils
   noChange: '변경 없음',
   keepMemory: '기존 유지 - memory',

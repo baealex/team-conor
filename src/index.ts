@@ -16,11 +16,10 @@ program
 
 program
   .command('init', { isDefault: true })
-  .description('Set up AI team personas / AI 팀 페르소나 설정')
-  .option('--name <name>', 'User name / 사용자 이름')
-  .option('-y, --force', 'Overwrite without asking / 묻지 않고 덮어쓰기', false)
-  .option('--no-interaction', 'Non-interactive mode / 비대화형 모드')
-  .option('--lang <locale>', 'Language: ko, en, ja / 언어 선택')
+  .description('AI 팀 페르소나 설정')
+  .option('--name <name>', '사용자 이름')
+  .option('-y, --force', '묻지 않고 덮어쓰기', false)
+  .option('--no-interaction', '비대화형 모드 (CI/CD 등)')
   .action(async (options) => {
     await initRun(options);
   });

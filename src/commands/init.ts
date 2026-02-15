@@ -4,45 +4,22 @@ import { fileURLToPath } from 'url';
 import prompts from 'prompts';
 import * as logger from '../utils/logger.js';
 import { writeFileWithConfirm, ensureDir } from '../utils/file.js';
-import { setLocale, getLocale, t, localeChoices } from '../locales/index.js';
-import type { Locale } from '../locales/index.js';
+import { t } from '../locales/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const templatesDir = path.join(__dirname, '..', '..', 'templates');
+const templatesDir = path.join(__dirname, '..', '..', 'templates', 'ko');
 
 interface InitOptions {
   name?: string;
   force: boolean;
   interaction: boolean;
-  lang?: string;
 }
 
 export async function run(options: InitOptions): Promise<void> {
   logger.newline();
 
-  // Language selection
-  if (options.lang && ['ko', 'en', 'ja'].includes(options.lang)) {
-    setLocale(options.lang as Locale);
-  } else if (options.interaction) {
-    const langResponse = await prompts({
-      type: 'select',
-      name: 'locale',
-      message: '🌐 Language / 언어 / 言語',
-      choices: localeChoices,
-    });
-
-    if (!langResponse.locale) {
-      logger.warn('Cancelled');
-      process.exit(0);
-    }
-
-    setLocale(langResponse.locale as Locale);
-  }
-
   const msg = t();
-  const locale = getLocale();
-  const langTemplatesDir = path.join(templatesDir, locale);
 
   logger.info(msg.initTitle);
   logger.newline();
@@ -95,13 +72,13 @@ export async function run(options: InitOptions): Promise<void> {
   const personaFiles = ['backend.md', 'designer.md', 'frontend.md', 'planner.md', 'pm.md'];
 
   for (const file of personaFiles) {
-    const src = path.join(langTemplatesDir, 'persona', file);
+    const src = path.join(templatesDir, 'persona', file);
     const dest = path.join(cwd, '.conor', 'persona', file);
     const content = fs.readFileSync(src, 'utf-8');
     await writeFileWithConfirm(dest, content, writeOpts);
   }
 
-  const userTemplate = fs.readFileSync(path.join(langTemplatesDir, 'persona', 'user.md'), 'utf-8');
+  const userTemplate = fs.readFileSync(path.join(templatesDir, 'persona', 'user.md'), 'utf-8');
   const userContent = userTemplate.replace(/\{\{userName\}\}/g, userName);
   await writeFileWithConfirm(
     path.join(cwd, '.conor', 'persona', 'user.md'),
@@ -116,7 +93,7 @@ export async function run(options: InitOptions): Promise<void> {
   const schemaFiles = ['learning.md', 'decision.md', 'project.md'];
 
   for (const file of schemaFiles) {
-    const src = path.join(langTemplatesDir, 'memory', '_schema', file);
+    const src = path.join(templatesDir, 'memory', '_schema', file);
     const dest = path.join(cwd, '.conor', 'memory', '_schema', file);
     const content = fs.readFileSync(src, 'utf-8');
     await writeFileWithConfirm(dest, content, writeOpts);
@@ -155,7 +132,7 @@ ${msg.summaryLearnings}
   logger.newline();
   logger.info(msg.claudeMd);
 
-  const claudeTemplate = fs.readFileSync(path.join(langTemplatesDir, 'CLAUDE.md'), 'utf-8');
+  const claudeTemplate = fs.readFileSync(path.join(templatesDir, 'CLAUDE.md'), 'utf-8');
   const claudeContent = claudeTemplate.replace(/\{\{userName\}\}/g, userName);
   await writeFileWithConfirm(path.join(cwd, 'CLAUDE.md'), claudeContent, writeOpts);
 

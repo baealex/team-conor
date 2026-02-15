@@ -22,9 +22,6 @@ export interface Messages {
   optionForce: string;
   optionNoInteraction: string;
 
-  // language selection
-  selectLanguage: string;
-
   // file utils
   noChange: string;
   keepMemory: string;
@@ -55,4 +52,3 @@ export interface Messages {
   chunksReady: string;
 }
 
-export type Locale = 'ko' | 'en' | 'ja';
