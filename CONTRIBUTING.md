@@ -40,9 +40,17 @@ src/
 ├── index.ts              # CLI 진입점 (commander 기반)
 ├── commands/
 │   └── init.ts           # init 커맨드
+├── locales/
+│   ├── types.ts          # 메시지 인터페이스
+│   ├── ko.ts             # 한국어 메시지
+│   └── index.ts          # 메시지 접근 함수
 └── utils/
     ├── logger.ts         # 컬러 로깅
     ├── diff.ts           # 파일 diff 표시
     └── file.ts           # 파일 쓰기 + 충돌 처리
-templates/                # 생성되는 템플릿 파일
+templates/
+└── ko/                   # 한국어 템플릿
+    ├── CLAUDE.md         # AI 설정 템플릿
+    ├── persona/          # 페르소나 파일
+    └── memory/           # 메모리 스키마
 ```
