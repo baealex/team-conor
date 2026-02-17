@@ -50,5 +50,9 @@ export interface Messages {
 
   // chunks
   chunksReady: string;
+
+  // CLAUDE.md template markers
+  templateRegionUpdated: string;
+  templateRegionNoChange: string;
 }
 

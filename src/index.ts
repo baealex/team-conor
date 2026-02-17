@@ -21,7 +21,7 @@ program
   .option('-y, --force', '묻지 않고 덮어쓰기', false)
   .option('--no-interaction', '비대화형 모드 (CI/CD 등)')
   .action(async (options) => {
-    await initRun(options);
+    await initRun({ ...options, version: pkg.version });
   });
 
 program.parse();

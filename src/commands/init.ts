@@ -14,6 +14,7 @@ interface InitOptions {
   name?: string;
   force: boolean;
   interaction: boolean;
+  version: string;
 }
 
 export async function run(options: InitOptions): Promise<void> {
@@ -25,7 +26,8 @@ export async function run(options: InitOptions): Promise<void> {
   logger.newline();
 
   const cwd = process.cwd();
-  const isUpdate = fs.existsSync(path.join(cwd, 'CLAUDE.md'));
+  const claudeMdExists = fs.existsSync(path.join(cwd, 'CLAUDE.md'));
+  const isUpdate = claudeMdExists && fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf-8').includes('TEAM CONOR TEMPLATE');
 
   if (isUpdate) {
     logger.warn(msg.updateDetected);
@@ -133,8 +135,38 @@ ${msg.summaryLearnings}
   logger.info(msg.claudeMd);
 
   const claudeTemplate = fs.readFileSync(path.join(templatesDir, 'CLAUDE.md'), 'utf-8');
-  const claudeContent = claudeTemplate.replace(/\{\{userName\}\}/g, userName);
-  await writeFileWithConfirm(path.join(cwd, 'CLAUDE.md'), claudeContent, writeOpts);
+  const renderedTemplate = claudeTemplate.replace(/\{\{userName\}\}/g, userName);
+
+  const MARKER_START_RE = /<!-- TEAM CONOR TEMPLATE[^-]*-->/;
+  const MARKER_END = '<!-- END TEAM CONOR TEMPLATE -->';
+  const markerStart = `<!-- TEAM CONOR TEMPLATE v${options.version} -->`;
+  const newBlock = `${markerStart}\n${renderedTemplate}\n${MARKER_END}`;
+
+  const claudeMdPath = path.join(cwd, 'CLAUDE.md');
+
+  if (fs.existsSync(claudeMdPath)) {
+    const existing = fs.readFileSync(claudeMdPath, 'utf-8');
+    const startMatch = existing.match(MARKER_START_RE);
+    const endIndex = existing.indexOf(MARKER_END);
+
+    if (startMatch && startMatch.index !== undefined && endIndex !== -1) {
+      const before = existing.substring(0, startMatch.index);
+      const after = existing.substring(endIndex + MARKER_END.length);
+      const merged = before + newBlock + after;
+
+      if (existing === merged) {
+        logger.dim(`  - CLAUDE.md (${msg.templateRegionNoChange})`);
+      } else {
+        fs.writeFileSync(claudeMdPath, merged);
+        logger.success(`  + CLAUDE.md (${msg.templateRegionUpdated})`);
+      }
+    } else {
+      await writeFileWithConfirm(claudeMdPath, newBlock, writeOpts);
+    }
+  } else {
+    fs.writeFileSync(claudeMdPath, newBlock + '\n');
+    logger.success('  + CLAUDE.md');
+  }
 
   logger.newline();
   logger.success(msg.done);
