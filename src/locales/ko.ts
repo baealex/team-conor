@@ -52,4 +52,8 @@ export const ko: Messages = {
 
   // chunks
   chunksReady: '+ chunks/ (atomic notes directory)',
+
+  // CLAUDE.md template markers
+  templateRegionUpdated: '템플릿 영역 업데이트',
+  templateRegionNoChange: '템플릿 영역 변경 없음',
 };
