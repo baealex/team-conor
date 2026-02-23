@@ -5,24 +5,37 @@ export const ko: Messages = {
   initTitle: 'Team Conor - AI 팀 페르소나 설정',
   updateDetected: '기존 설정이 감지되었습니다. 업데이트 모드로 진행합니다.',
   nameRequired: '--no-interaction 모드에서는 --name 옵션이 필요합니다.',
-  nameRequiredExample: '  예: team-conor init --name "홍길동" --no-interaction',
+  nameRequiredExample: '  예: team-conor --name "홍길동" --no-interaction --agent claude',
   enterName: '이름을 입력하세요',
   enterNameValidation: '이름을 입력해주세요',
   cancelled: '취소됨',
   personaFiles: '페르소나 파일:',
   memoryFiles: 'Memory 파일:',
-  claudeMd: 'CLAUDE.md:',
+  conorMd: 'CONOR.md:',
+  agentFiles: '에이전트 파일:',
   done: '완료!',
   teamIntro: (name: string) => `${name}님의 팀:`,
   teamMembers1: '  스티브 (제품 전략) | 엘런 (실행 PM) | 마르코 (UX)',
   teamMembers2: '  유나 (Frontend)   | 빅토르 (Backend)',
   usageHint: '사용법: "유나, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요',
 
+  // agent selection
+  selectAgent: 'AI 도구를 선택하세요 (스페이스바로 복수 선택)',
+  agentClaude: 'Claude (CLAUDE.md)',
+  agentCodex: 'Codex (AGENTS.md)',
+  agentCustom: '직접 입력',
+  enterAgentFilename: '파일명을 입력하세요 (예: CURSOR.md)',
+  agentRequired: '--no-interaction 모드에서는 --agent 옵션이 필요합니다.',
+
+  // migration
+  migrationDetected: '기존 CLAUDE.md에서 CONOR.md 마이그레이션을 진행합니다.',
+
   // init command descriptions
   initDescription: 'AI 팀 페르소나를 프로젝트에 설정합니다',
   optionName: '사용자 이름 (비대화형 모드에서 필수)',
   optionForce: '기존 파일을 묻지 않고 덮어쓰기',
   optionNoInteraction: '비대화형 모드 (CI/CD 등)',
+  agentOption: 'AI 도구 선택 (claude, codex, 또는 파일명)',
 
   // file utils
   noChange: '변경 없음',
@@ -53,7 +66,18 @@ export const ko: Messages = {
   // chunks
   chunksReady: '+ chunks/ (atomic notes directory)',
 
-  // CLAUDE.md template markers
+  // CONOR.md template markers
   templateRegionUpdated: '템플릿 영역 업데이트',
   templateRegionNoChange: '템플릿 영역 변경 없음',
+
+  // Agent file markers
+  agentRegionUpdated: '에이전트 영역 업데이트',
+  agentRegionNoChange: '에이전트 영역 변경 없음',
+
+  // summary command
+  summaryDescription: 'chunks에서 summary.md를 자동 생성합니다',
+  summaryNoChunksDir: '.conor/memory/chunks/ 디렉토리가 없습니다. 먼저 team-conor init을 실행하세요.',
+  summaryNoChunks: 'chunks 디렉토리에 .md 파일이 없습니다.',
+  summaryNoValidChunks: '유효한 chunk 파일이 없습니다. frontmatter(type, date)를 확인하세요.',
+  summaryGenerated: (count: number) => `summary.md 생성 완료 (${count}개 chunk)`,
 };
