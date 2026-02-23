@@ -9,18 +9,31 @@ export interface Messages {
   cancelled: string;
   personaFiles: string;
   memoryFiles: string;
-  claudeMd: string;
+  conorMd: string;
+  agentFiles: string;
   done: string;
   teamIntro: (name: string) => string;
   teamMembers1: string;
   teamMembers2: string;
   usageHint: string;
 
+  // agent selection
+  selectAgent: string;
+  agentClaude: string;
+  agentCodex: string;
+  agentCustom: string;
+  enterAgentFilename: string;
+  agentRequired: string;
+
+  // migration
+  migrationDetected: string;
+
   // init command descriptions
   initDescription: string;
   optionName: string;
   optionForce: string;
   optionNoInteraction: string;
+  agentOption: string;
 
   // file utils
   noChange: string;
@@ -51,8 +64,18 @@ export interface Messages {
   // chunks
   chunksReady: string;
 
-  // CLAUDE.md template markers
+  // CONOR.md template markers
   templateRegionUpdated: string;
   templateRegionNoChange: string;
-}
 
+  // Agent file markers
+  agentRegionUpdated: string;
+  agentRegionNoChange: string;
+
+  // summary command
+  summaryDescription: string;
+  summaryNoChunksDir: string;
+  summaryNoChunks: string;
+  summaryNoValidChunks: string;
+  summaryGenerated: (count: number) => string;
+}
