@@ -72,6 +72,9 @@ export interface Messages {
   agentRegionUpdated: string;
   agentRegionNoChange: string;
 
+  // skill files
+  skillFiles: string;
+
   // summary command
   summaryDescription: string;
   summaryNoChunksDir: string;

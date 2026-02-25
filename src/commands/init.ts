@@ -5,6 +5,7 @@ import prompts from 'prompts';
 import * as logger from '../utils/logger.js';
 import { writeFileWithConfirm, ensureDir } from '../utils/file.js';
 import { t } from '../locales/index.js';
+import { parseSkillTemplate, toClaudeCommand, toCodexSkill } from '../utils/skill.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,11 @@ const templatesDir = path.join(__dirname, '..', '..', 'templates', 'ko');
 const AGENT_MAP: Record<string, string> = {
   claude: 'CLAUDE.md',
   codex: 'AGENTS.md',
+};
+
+const SKILL_TRANSFORMER_MAP: Record<string, typeof toClaudeCommand> = {
+  'CLAUDE.md': toClaudeCommand,
+  'AGENTS.md': toCodexSkill,
 };
 
 interface InitOptions {
@@ -33,15 +39,18 @@ export async function run(options: InitOptions): Promise<void> {
 
   const cwd = process.cwd();
 
-  // Detect migration: existing CLAUDE.md with TEAM CONOR TEMPLATE marker
+  // Detect migration: existing CLAUDE.md with TEAM CONOR TEMPLATE marker, or old root CONOR.md
   const claudeMdPath = path.join(cwd, 'CLAUDE.md');
-  const conorMdPath = path.join(cwd, 'CONOR.md');
+  const conorMdPath = path.join(cwd, '.conor', 'CONOR.md');
+  const oldConorMdPath = path.join(cwd, 'CONOR.md');
   const claudeMdExists = fs.existsSync(claudeMdPath);
   const conorMdExists = fs.existsSync(conorMdPath);
+  const oldConorMdExists = fs.existsSync(oldConorMdPath);
   const needsMigration = claudeMdExists && fs.readFileSync(claudeMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
   const isUpdate = conorMdExists && fs.readFileSync(conorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
+  const needsConorMove = !conorMdExists && oldConorMdExists && fs.readFileSync(oldConorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
 
-  if (needsMigration) {
+  if (needsMigration || needsConorMove) {
     logger.warn(msg.migrationDetected);
     logger.newline();
   } else if (isUpdate) {
@@ -99,7 +108,7 @@ export async function run(options: InitOptions): Promise<void> {
   ensureDir(path.join(cwd, '.conor', 'memory', 'chunks'));
 
   const writeOpts = {
-    alwaysAsk: (isUpdate || needsMigration) && options.interaction,
+    alwaysAsk: (isUpdate || needsMigration || needsConorMove) && options.interaction,
     force: options.force,
   };
 
@@ -165,12 +174,45 @@ ${msg.summaryLearnings}
 
   logger.success(`  ${msg.chunksReady}`);
 
+  // --- Parse skill templates ---
+  const skillsDir = path.join(templatesDir, 'skills');
+  const skills: import('../utils/skill.js').SkillMeta[] = [];
+
+  if (fs.existsSync(skillsDir)) {
+    const skillFileNames = fs.readdirSync(skillsDir).filter((f) => f.endsWith('.md'));
+    for (const file of skillFileNames) {
+      const src = path.join(skillsDir, file);
+      const content = fs.readFileSync(src, 'utf-8');
+      skills.push(parseSkillTemplate(content));
+    }
+  }
+
   // --- CONOR.md (template) ---
   logger.newline();
   logger.info(msg.conorMd);
 
   const conorTemplate = fs.readFileSync(path.join(templatesDir, 'CONOR.md'), 'utf-8');
-  const renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
+  let renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
+
+  // Append skill trigger → file path mappings to CONOR.md
+  const skillMappings = skills.filter((s) => s.trigger);
+  if (skillMappings.length > 0) {
+    const allMappingLines: string[] = [];
+    for (const agentFile of selectedAgents) {
+      const transformer = SKILL_TRANSFORMER_MAP[agentFile] || toClaudeCommand;
+      for (const skill of skillMappings) {
+        const line = `- ${skill.trigger} → ${transformer(skill).path} 를 읽고 지시사항을 따르세요`;
+        if (!allMappingLines.includes(line)) {
+          allMappingLines.push(line);
+        }
+      }
+    }
+
+    renderedTemplate += '\n<commands>\n';
+    renderedTemplate += '다음 상황에서 해당 파일을 읽고 지시사항을 따르세요:\n';
+    renderedTemplate += allMappingLines.join('\n') + '\n';
+    renderedTemplate += '</commands>\n';
+  }
 
   const TEMPLATE_START_RE = /<!-- TEAM CONOR TEMPLATE[^-]*-->/;
   const TEMPLATE_END = '<!-- END TEAM CONOR TEMPLATE -->';
@@ -178,18 +220,17 @@ ${msg.summaryLearnings}
   const templateBlock = `${templateMarkerStart}\n${renderedTemplate}\n${TEMPLATE_END}`;
 
   if (needsMigration) {
-    // Migration: extract template content from CLAUDE.md → CONOR.md
+    // Migration: extract template content from CLAUDE.md → .conor/CONOR.md
     const claudeContent = fs.readFileSync(claudeMdPath, 'utf-8');
     const startMatch = claudeContent.match(TEMPLATE_START_RE);
     const endIndex = claudeContent.indexOf(TEMPLATE_END);
 
     if (startMatch && startMatch.index !== undefined && endIndex !== -1) {
-      // Write CONOR.md with the new template block
       fs.writeFileSync(conorMdPath, templateBlock + '\n');
-      logger.success(`  + CONOR.md (${msg.templateRegionUpdated})`);
+      logger.success(`  + .conor/CONOR.md (${msg.templateRegionUpdated})`);
 
       // Replace the template region in CLAUDE.md with agent region
-      const agentTemplate = fs.readFileSync(path.join(templatesDir, 'agents', 'CLAUDE.md'), 'utf-8');
+      const agentTemplate = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
       const AGENT_START = `<!-- TEAM CONOR AGENT v${options.version} -->`;
       const AGENT_END = '<!-- END TEAM CONOR AGENT -->';
       const agentBlock = `${AGENT_START}\n${agentTemplate}${AGENT_END}`;
@@ -200,8 +241,13 @@ ${msg.summaryLearnings}
       fs.writeFileSync(claudeMdPath, migratedClaude);
       logger.success(`  + CLAUDE.md (${msg.agentRegionUpdated})`);
     }
+  } else if (needsConorMove) {
+    // Migration: move root CONOR.md → .conor/CONOR.md
+    fs.writeFileSync(conorMdPath, templateBlock + '\n');
+    fs.unlinkSync(oldConorMdPath);
+    logger.success(`  + .conor/CONOR.md (${msg.templateRegionUpdated})`);
   } else {
-    writeMarkerRegion(conorMdPath, templateBlock, TEMPLATE_START_RE, TEMPLATE_END, 'CONOR.md', msg.templateRegionUpdated, msg.templateRegionNoChange, writeOpts);
+    writeMarkerRegion(conorMdPath, templateBlock, TEMPLATE_START_RE, TEMPLATE_END, '.conor/CONOR.md', msg.templateRegionUpdated, msg.templateRegionNoChange, writeOpts);
   }
 
   // --- Agent files ---
@@ -214,15 +260,7 @@ ${msg.summaryLearnings}
 
   for (const agentFile of selectedAgents) {
     const agentFilePath = path.join(cwd, agentFile);
-    const knownAgent = Object.values(AGENT_MAP).includes(agentFile);
-
-    let agentContent: string;
-    if (knownAgent) {
-      agentContent = fs.readFileSync(path.join(templatesDir, 'agents', agentFile), 'utf-8');
-    } else {
-      // Custom agent file — use the CLAUDE.md template as base
-      agentContent = fs.readFileSync(path.join(templatesDir, 'agents', 'CLAUDE.md'), 'utf-8');
-    }
+    const agentContent = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
 
     const agentBlock = `${agentMarkerStart}\n${agentContent}${AGENT_END}`;
 
@@ -232,6 +270,22 @@ ${msg.summaryLearnings}
     }
 
     writeMarkerRegion(agentFilePath, agentBlock, AGENT_START_RE, AGENT_END, agentFile, msg.agentRegionUpdated, msg.agentRegionNoChange, writeOpts);
+  }
+
+  // --- Skill files ---
+  if (skills.length > 0) {
+    logger.newline();
+    logger.info(msg.skillFiles);
+
+    for (const skill of skills) {
+      for (const agentFile of selectedAgents) {
+        const transformer = SKILL_TRANSFORMER_MAP[agentFile] || toClaudeCommand;
+        const result = transformer(skill);
+        const destPath = path.join(cwd, result.path);
+        ensureDir(path.dirname(destPath));
+        await writeFileWithConfirm(destPath, result.content, writeOpts);
+      }
+    }
   }
 
   // --- Done ---
