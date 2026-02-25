@@ -74,6 +74,9 @@ export const ko: Messages = {
   agentRegionUpdated: '에이전트 영역 업데이트',
   agentRegionNoChange: '에이전트 영역 변경 없음',
 
+  // skill files
+  skillFiles: '스킬 파일:',
+
   // summary command
   summaryDescription: 'chunks에서 summary.md를 자동 생성합니다',
   summaryNoChunksDir: '.conor/memory/chunks/ 디렉토리가 없습니다. 먼저 team-conor init을 실행하세요.',
