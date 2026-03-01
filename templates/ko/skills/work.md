@@ -33,7 +33,7 @@ Zettelkasten 기반. `.conor/memory/summary.md`는 항상 컨텍스트에 로드
 ```
 
 ### chunk 규칙
-1. 작성 전: 해당 타입의 스키마 파일(`_schema/*.md`)을 먼저 읽고 형식을 따른다
+1. 작성 전: 해당 타입의 스키마 파일(`.conor/memory/_schema/*.md`)을 먼저 읽고 형식을 따른다
 2. 파일명: `{타입}-{YYYYMMDD}-{영문slug}.md` (L/D/P)
 3. 분량: 핵심만 담아 10줄 이내
 4. 원자성: 하나의 chunk = 하나의 주제
