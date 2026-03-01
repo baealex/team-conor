@@ -43,10 +43,15 @@ export function toClaudeCommand(skill: SkillMeta): { path: string; content: stri
 
 export function toCodexSkill(skill: SkillMeta): { path: string; content: string } {
   const lines: string[] = [];
-  lines.push(`# ${skill.name}`);
+  lines.push('---');
+  lines.push(`name: ${skill.name}`);
   if (skill.description) {
-    lines.push(`${skill.description}`);
+    lines.push(`description: "${skill.description}"`);
   }
+  if (skill.trigger) {
+    lines.push(`trigger: "${skill.trigger}"`);
+  }
+  lines.push('---');
   lines.push('');
   lines.push(skill.body);
   lines.push('');

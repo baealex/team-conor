@@ -22,8 +22,13 @@ npx team-conor
 # 대화형 설정 (기본)
 npx team-conor init
 
+# AI 도구 선택 (claude, codex, 또는 커스텀 파일명)
+npx team-conor init --agent claude
+npx team-conor init --agent codex
+npx team-conor init --agent claude codex  # 동시에 여러 도구 지원
+
 # 비대화형 모드 (CI/CD 등 인터렉션 불가 환경)
-npx team-conor init --name "홍길동" --no-interaction
+npx team-conor init --name "홍길동" --agent claude --no-interaction
 
 # 기존 파일 강제 덮어쓰기
 npx team-conor init --name "홍길동" -y
@@ -36,8 +41,9 @@ npx team-conor --version
 ## 생성되는 파일
 
 ```
-CLAUDE.md                        # AI 설정 파일
+CLAUDE.md / AGENTS.md            # 에이전트 진입점 → .conor/CONOR.md 읽기 지시
 .conor/
+├── CONOR.md                     # 라우팅 테이블 (페르소나 목록 + 커맨드 매핑)
 ├── persona/                     # 팀원 페르소나
 │   ├── user.md                  # 사용자 (프로젝트 오너)
 │   ├── planner.md               # 스티브 (제품 전략)
@@ -52,6 +58,23 @@ CLAUDE.md                        # AI 설정 파일
     │   ├── decision.md
     │   └── project.md
     └── chunks/                  # 원자적 메모 저장소
+
+# Claude 선택 시
+.claude/commands/
+├── conor-work.md                # 작업 모드
+├── conor-review.md              # 코드 리뷰
+├── conor-meeting.md             # 팀 회의
+├── conor-summary.md             # 메모리 요약
+├── conor-deep-plan.md           # 딥 모드: 제품 전략 (스티브)
+├── conor-deep-design.md         # 딥 모드: UX 설계 (마르코)
+├── conor-deep-server.md         # 딥 모드: 백엔드 (빅토르)
+└── conor-deep-client.md         # 딥 모드: 프론트엔드 (유나)
+
+# Codex 선택 시
+.agents/skills/
+├── conor-work/SKILL.md
+├── conor-review/SKILL.md
+├── ...
 ```
 
 ## 팀 구성
@@ -86,7 +109,39 @@ CLAUDE.md                        # AI 설정 파일
 이 버그 수정해줘  → 실제 작업 수행 후, 관련 페르소나 관점에서 자체 검증
 ```
 
+### 커맨드 (v1.1.0+)
+
+Claude Code에서는 슬래시 커맨드로, Codex에서는 스킬로 사용할 수 있습니다.
+
+**기본 커맨드:**
+
+| 커맨드 | 설명 |
+|--------|------|
+| `/conor-work` | 페르소나 기반 작업 수행 및 메모리 관리 |
+| `/conor-review` | 팀 페르소나 기반 코드 리뷰 |
+| `/conor-meeting` | 팀 회의 (다중 관점 토론) |
+| `/conor-summary` | 메모리 chunks → summary.md 자동 생성 |
+
+**딥 모드** — 특정 페르소나의 전문 영역을 깊이 있게 활용:
+
+| 커맨드 | 페르소나 | 용도 |
+|--------|----------|------|
+| `/conor-deep-plan` | 스티브 | 제품 전략, 기능 기획 |
+| `/conor-deep-design` | 마르코 | UX 설계, 사용자 경험 |
+| `/conor-deep-server` | 빅토르 | 백엔드 아키텍처, 시스템 설계 |
+| `/conor-deep-client` | 유나 | 프론트엔드 아키텍처, UI 구현 |
+
 ## 설계 철학
+
+### 라우팅 아키텍처
+
+에이전트 진입점(`CLAUDE.md` 등)은 `.conor/CONOR.md`를 읽도록 지시하는 역할만 합니다. `CONOR.md`는 페르소나 목록과 커맨드 라우팅 테이블을 담고 있어, 상황에 따라 적절한 커맨드 파일로 분기합니다.
+
+```
+CLAUDE.md / AGENTS.md
+  → .conor/CONOR.md (페르소나 목록 + 커맨드 라우팅 테이블)
+    → .claude/commands/conor-*.md 또는 .agents/skills/conor-*/SKILL.md
+```
 
 ### 캐릭터 + 활성화 트리거
 
@@ -127,12 +182,20 @@ Zettelkasten 기반으로 프로젝트 컨텍스트를 `.conor/memory/`에 기�
   - `D-*`: 결정 (기술 선택, 아키텍처)
   - `P-*`: 프로젝트 (구조, 빌드, 배포)
 
+### 멀티 에이전트 지원
+
+`--agent` 옵션으로 여러 AI 도구를 동시에 지원할 수 있습니다:
+- **Claude Code**: `CLAUDE.md` + `.claude/commands/` 에 커맨드 파일 생성
+- **Codex**: `AGENTS.md` + `.agents/skills/` 에 스킬 파일 생성
+- 동일한 페르소나와 커맨드를 각 에이전트 형식에 맞게 자동 변환
+
 ### 업데이트 지원
 
 이미 설정된 프로젝트에서 `npx team-conor`를 다시 실행하면:
 - 기존 파일과 비교하여 diff 표시
 - 덮어쓰기 / 건너뛰기 / 백업 선택 가능
 - **memory 파일은 자동으로 보존** (사용자 데이터 보호)
+- 이전 버전(루트 `CONOR.md`, `CLAUDE.md` 내 템플릿)에서 자동 마이그레이션
 
 ## 커스터마이징
 

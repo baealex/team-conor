@@ -195,17 +195,13 @@ ${msg.summaryLearnings}
   let renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
 
   // Append skill trigger → file path mappings to CONOR.md
+  // Use only the first agent's transformer to avoid duplicate entries when multiple agents are selected
   const skillMappings = skills.filter((s) => s.trigger);
   if (skillMappings.length > 0) {
+    const transformer = SKILL_TRANSFORMER_MAP[selectedAgents[0]] || toClaudeCommand;
     const allMappingLines: string[] = [];
-    for (const agentFile of selectedAgents) {
-      const transformer = SKILL_TRANSFORMER_MAP[agentFile] || toClaudeCommand;
-      for (const skill of skillMappings) {
-        const line = `- ${skill.trigger} → ${transformer(skill).path} 를 읽고 지시사항을 따르세요`;
-        if (!allMappingLines.includes(line)) {
-          allMappingLines.push(line);
-        }
-      }
+    for (const skill of skillMappings) {
+      allMappingLines.push(`- ${skill.trigger} → ${transformer(skill).path} 를 읽고 지시사항을 따르세요`);
     }
 
     renderedTemplate += '\n<commands>\n';

@@ -10,5 +10,5 @@ trigger: "사용자가 회의를 요청하면"
 2. 선택지 도출 → 페르소나들이 각자 관점에서 옵션을 제시한다
 3. 트레이드오프 → 각 옵션의 장단점을 정리한다
 4. 결정 → 사용자가 선택한다
-5. ADR 기록 → D-chunk를 스키마 형식(.conor/memory/_schema/decision.md)으로 기록한다
+5. ADR 기록 → D-chunk를 스키마 형식(`.conor/memory/_schema/decision.md`)으로 기록한다
 6. 인덱스 갱신 → `npx team-conor summary` 를 실행하여 summary.md를 갱신한다
