@@ -72,8 +72,8 @@ export interface Messages {
   agentRegionUpdated: string;
   agentRegionNoChange: string;
 
-  // skill files
-  skillFiles: string;
+  // workflow files
+  workflowFiles: string;
 
   // summary command
   summaryDescription: string;
