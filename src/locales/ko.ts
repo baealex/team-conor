@@ -74,8 +74,8 @@ export const ko: Messages = {
   agentRegionUpdated: '에이전트 영역 업데이트',
   agentRegionNoChange: '에이전트 영역 변경 없음',
 
-  // skill files
-  skillFiles: '스킬 파일:',
+  // workflow files
+  workflowFiles: '워크플로우 파일:',
 
   // summary command
   summaryDescription: 'chunks에서 summary.md를 자동 생성합니다',

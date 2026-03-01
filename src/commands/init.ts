@@ -5,7 +5,6 @@ import prompts from 'prompts';
 import * as logger from '../utils/logger.js';
 import { writeFileWithConfirm, ensureDir } from '../utils/file.js';
 import { t } from '../locales/index.js';
-import { parseSkillTemplate, toClaudeCommand, toCodexSkill } from '../utils/skill.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,11 +13,6 @@ const templatesDir = path.join(__dirname, '..', '..', 'templates', 'ko');
 const AGENT_MAP: Record<string, string> = {
   claude: 'CLAUDE.md',
   codex: 'AGENTS.md',
-};
-
-const SKILL_TRANSFORMER_MAP: Record<string, typeof toClaudeCommand> = {
-  'CLAUDE.md': toClaudeCommand,
-  'AGENTS.md': toCodexSkill,
 };
 
 interface InitOptions {
@@ -106,6 +100,7 @@ export async function run(options: InitOptions): Promise<void> {
   ensureDir(path.join(cwd, '.conor', 'memory'));
   ensureDir(path.join(cwd, '.conor', 'memory', '_schema'));
   ensureDir(path.join(cwd, '.conor', 'memory', 'chunks'));
+  ensureDir(path.join(cwd, '.conor', 'workflows'));
 
   const writeOpts = {
     alwaysAsk: (isUpdate || needsMigration || needsConorMove) && options.interaction,
@@ -174,17 +169,18 @@ ${msg.summaryLearnings}
 
   logger.success(`  ${msg.chunksReady}`);
 
-  // --- Parse skill templates ---
-  const skillsDir = path.join(templatesDir, 'skills');
-  const skills: import('../utils/skill.js').SkillMeta[] = [];
+  // --- Workflow files ---
+  logger.newline();
+  logger.info(msg.workflowFiles);
 
-  if (fs.existsSync(skillsDir)) {
-    const skillFileNames = fs.readdirSync(skillsDir).filter((f) => f.endsWith('.md'));
-    for (const file of skillFileNames) {
-      const src = path.join(skillsDir, file);
-      const content = fs.readFileSync(src, 'utf-8');
-      skills.push(parseSkillTemplate(content));
-    }
+  const workflowFiles = ['work.md', 'review.md', 'meeting.md',
+    'deep-plan.md', 'deep-design.md', 'deep-server.md', 'deep-client.md'];
+
+  for (const file of workflowFiles) {
+    const src = path.join(templatesDir, 'workflows', file);
+    const dest = path.join(cwd, '.conor', 'workflows', file);
+    const content = fs.readFileSync(src, 'utf-8');
+    await writeFileWithConfirm(dest, content, writeOpts);
   }
 
   // --- CONOR.md (template) ---
@@ -192,23 +188,7 @@ ${msg.summaryLearnings}
   logger.info(msg.conorMd);
 
   const conorTemplate = fs.readFileSync(path.join(templatesDir, 'CONOR.md'), 'utf-8');
-  let renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
-
-  // Append skill trigger → file path mappings to CONOR.md
-  // Use only the first agent's transformer to avoid duplicate entries when multiple agents are selected
-  const skillMappings = skills.filter((s) => s.trigger);
-  if (skillMappings.length > 0) {
-    const transformer = SKILL_TRANSFORMER_MAP[selectedAgents[0]] || toClaudeCommand;
-    const allMappingLines: string[] = [];
-    for (const skill of skillMappings) {
-      allMappingLines.push(`- ${skill.trigger} → ${transformer(skill).path} 를 읽고 지시사항을 따르세요`);
-    }
-
-    renderedTemplate += '\n<commands>\n';
-    renderedTemplate += '다음 상황에서 해당 파일을 읽고 지시사항을 따르세요:\n';
-    renderedTemplate += allMappingLines.join('\n') + '\n';
-    renderedTemplate += '</commands>\n';
-  }
+  const renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
 
   const TEMPLATE_START_RE = /<!-- TEAM CONOR TEMPLATE[^-]*-->/;
   const TEMPLATE_END = '<!-- END TEAM CONOR TEMPLATE -->';
@@ -266,22 +246,6 @@ ${msg.summaryLearnings}
     }
 
     writeMarkerRegion(agentFilePath, agentBlock, AGENT_START_RE, AGENT_END, agentFile, msg.agentRegionUpdated, msg.agentRegionNoChange, writeOpts);
-  }
-
-  // --- Skill files ---
-  if (skills.length > 0) {
-    logger.newline();
-    logger.info(msg.skillFiles);
-
-    for (const skill of skills) {
-      for (const agentFile of selectedAgents) {
-        const transformer = SKILL_TRANSFORMER_MAP[agentFile] || toClaudeCommand;
-        const result = transformer(skill);
-        const destPath = path.join(cwd, result.path);
-        ensureDir(path.dirname(destPath));
-        await writeFileWithConfirm(destPath, result.content, writeOpts);
-      }
-    }
   }
 
   // --- Done ---
