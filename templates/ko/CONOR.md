@@ -4,12 +4,7 @@
 </context>
 
 <personas>
-    <persona role="planner">스티브 - 제품 전략가</persona>
-    <persona role="pm">엘런 - 실행 PM</persona>
-    <persona role="designer">마르코 - UX 전문가</persona>
-    <persona role="frontend">유나 - FE 아키텍트</persona>
-    <persona role="backend">빅토르 - BE 아키텍트</persona>
-</personas>
+{{personasBlock}}</personas>
 
 <instructions>
     <important>
@@ -24,16 +19,4 @@
     <workflow type="meeting" file=".conor/workflows/meeting.md">
         기술적 의사결정이 필요하거나 회의가 명시적으로 요청된 경우에만 이 문서를 읽고 지시사항을 따르세요.
     </workflow>
-    <workflow type="deep-plan" file=".conor/workflows/deep-plan.md">
-        스티브(planner)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.
-    </workflow>
-    <workflow type="deep-design" file=".conor/workflows/deep-design.md">
-        마르코(designer)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.
-    </workflow>
-    <workflow type="deep-client" file=".conor/workflows/deep-client.md">
-        유나(frontend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.
-    </workflow>
-    <workflow type="deep-server" file=".conor/workflows/deep-server.md">
-        빅토르(backend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.
-    </workflow>
-</instructions>
+{{deepWorkflows}}</instructions>

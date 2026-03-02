@@ -18,6 +18,7 @@ program
   .option('-y, --force', '묻지 않고 덮어쓰기', false)
   .option('--no-interaction', '비대화형 모드 (CI/CD 등)')
   .option('--agent <agents...>', 'AI 도구 선택 (claude, codex, 또는 파일명)')
+  .option('--persona <personas...>', '페르소나 선택 (planner, pm, designer, frontend, backend)')
   .action(async (options) => {
     await initRun({ ...options, version: pkg.version });
   });
