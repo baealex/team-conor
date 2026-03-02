@@ -15,11 +15,52 @@ const AGENT_MAP: Record<string, string> = {
   codex: 'AGENTS.md',
 };
 
+interface PersonaMeta {
+  key: string;
+  file: string;
+  role: string;
+  label: string;
+  deepWorkflow: { file: string; type: string; desc: string } | null;
+}
+
+const ALL_PERSONAS: PersonaMeta[] = [
+  {
+    key: 'planner', file: 'planner.md', role: 'planner',
+    label: '스티브 - 제품 전략가',
+    deepWorkflow: { file: 'deep-plan.md', type: 'deep-plan',
+      desc: '스티브(planner)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
+  {
+    key: 'pm', file: 'pm.md', role: 'pm',
+    label: '엘런 - 실행 PM',
+    deepWorkflow: null,
+  },
+  {
+    key: 'designer', file: 'designer.md', role: 'designer',
+    label: '마르코 - UX 전문가',
+    deepWorkflow: { file: 'deep-design.md', type: 'deep-design',
+      desc: '마르코(designer)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
+  {
+    key: 'frontend', file: 'frontend.md', role: 'frontend',
+    label: '유나 - FE 아키텍트',
+    deepWorkflow: { file: 'deep-client.md', type: 'deep-client',
+      desc: '유나(frontend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
+  {
+    key: 'backend', file: 'backend.md', role: 'backend',
+    label: '빅토르 - BE 아키텍트',
+    deepWorkflow: { file: 'deep-server.md', type: 'deep-server',
+      desc: '빅토르(backend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
+];
+
 interface InitOptions {
   name?: string;
   force: boolean;
   interaction: boolean;
   agent?: string[];
+  persona?: string[];
   version: string;
 }
 
@@ -77,6 +118,23 @@ export async function run(options: InitOptions): Promise<void> {
     userName = response.userName as string;
   }
 
+  // --- Persona selection ---
+  let selectedPersonas = resolvePersonas(options.persona);
+
+  if (!selectedPersonas) {
+    if (!options.interaction) {
+      // Non-interactive without --persona: select all
+      selectedPersonas = ALL_PERSONAS;
+    } else {
+      selectedPersonas = await promptPersonaSelection(msg, cwd, isUpdate || needsMigration || needsConorMove);
+
+      if (!selectedPersonas || selectedPersonas.length === 0) {
+        logger.warn(msg.cancelled);
+        process.exit(0);
+      }
+    }
+  }
+
   // --- Agent selection ---
   let selectedAgents = resolveAgents(options.agent);
 
@@ -111,9 +169,9 @@ export async function run(options: InitOptions): Promise<void> {
   logger.newline();
   logger.info(msg.personaFiles);
 
-  const personaFiles = ['backend.md', 'designer.md', 'frontend.md', 'planner.md', 'pm.md'];
+  const selectedPersonaFiles = selectedPersonas.map((p) => p.file);
 
-  for (const file of personaFiles) {
+  for (const file of selectedPersonaFiles) {
     const src = path.join(templatesDir, 'persona', file);
     const dest = path.join(cwd, '.conor', 'persona', file);
     const content = fs.readFileSync(src, 'utf-8');
@@ -173,8 +231,11 @@ ${msg.summaryLearnings}
   logger.newline();
   logger.info(msg.workflowFiles);
 
-  const workflowFiles = ['work.md', 'review.md', 'meeting.md',
-    'deep-plan.md', 'deep-design.md', 'deep-server.md', 'deep-client.md'];
+  const baseWorkflowFiles = ['work.md', 'review.md', 'meeting.md'];
+  const selectedDeepWorkflows = selectedPersonas
+    .filter((p) => p.deepWorkflow !== null)
+    .map((p) => p.deepWorkflow!.file);
+  const workflowFiles = [...baseWorkflowFiles, ...selectedDeepWorkflows];
 
   for (const file of workflowFiles) {
     const src = path.join(templatesDir, 'workflows', file);
@@ -188,7 +249,27 @@ ${msg.summaryLearnings}
   logger.info(msg.conorMd);
 
   const conorTemplate = fs.readFileSync(path.join(templatesDir, 'CONOR.md'), 'utf-8');
-  const renderedTemplate = conorTemplate.replace(/\{\{userName\}\}/g, userName);
+
+  // Build personas block
+  const personasBlock = selectedPersonas
+    .map((p) => `    <persona role="${p.role}">${p.label}</persona>`)
+    .join('\n') + '\n';
+
+  // Build deep-workflows block
+  const deepWorkflowLines = selectedPersonas
+    .filter((p) => p.deepWorkflow !== null)
+    .map((p) => {
+      const dw = p.deepWorkflow!;
+      return `    <workflow type="${dw.type}" file=".conor/workflows/${dw.file}">\n        ${dw.desc}\n    </workflow>`;
+    });
+  const deepWorkflows = deepWorkflowLines.length > 0
+    ? deepWorkflowLines.join('\n') + '\n'
+    : '';
+
+  const renderedTemplate = conorTemplate
+    .replace(/\{\{userName\}\}/g, userName)
+    .replace(/\{\{personasBlock\}\}/, personasBlock)
+    .replace(/\{\{deepWorkflows\}\}/, deepWorkflows);
 
   const TEMPLATE_START_RE = /<!-- TEAM CONOR TEMPLATE[^-]*-->/;
   const TEMPLATE_END = '<!-- END TEAM CONOR TEMPLATE -->';
@@ -253,8 +334,11 @@ ${msg.summaryLearnings}
   logger.success(msg.done);
   logger.newline();
   logger.info(msg.teamIntro(userName));
-  logger.dim(msg.teamMembers1);
-  logger.dim(msg.teamMembers2);
+  const personaLabels = selectedPersonas.map((p) => p.label);
+  for (let i = 0; i < personaLabels.length; i += 3) {
+    const line = personaLabels.slice(i, i + 3).map((l) => l).join(' | ');
+    logger.dim(`  ${line}`);
+  }
   logger.newline();
   logger.dim(msg.usageHint);
   logger.newline();
@@ -296,6 +380,50 @@ function writeMarkerRegion(
     fs.writeFileSync(filePath, newBlock + '\n');
     logger.success(`  + ${displayName}`);
   }
+}
+
+function resolvePersonas(personaArgs?: string[]): PersonaMeta[] | null {
+  if (!personaArgs || personaArgs.length === 0) return null;
+
+  const result: PersonaMeta[] = [];
+  for (const arg of personaArgs) {
+    const found = ALL_PERSONAS.find((p) => p.key === arg.toLowerCase());
+    if (found) {
+      result.push(found);
+    } else {
+      logger.warn(`  unknown persona: ${arg}`);
+    }
+  }
+  return result.length > 0 ? result : null;
+}
+
+async function promptPersonaSelection(
+  msg: ReturnType<typeof t>,
+  cwd: string,
+  isUpdate: boolean,
+): Promise<PersonaMeta[] | null> {
+  const personaDir = path.join(cwd, '.conor', 'persona');
+  const existingFiles = isUpdate && fs.existsSync(personaDir)
+    ? fs.readdirSync(personaDir)
+    : [];
+
+  const response = await prompts({
+    type: 'multiselect',
+    name: 'personas',
+    message: msg.selectPersona,
+    choices: ALL_PERSONAS.map((p) => ({
+      title: p.label,
+      value: p.key,
+      selected: isUpdate ? existingFiles.includes(p.file) : true,
+    })),
+    hint: '- 스페이스바로 선택, 엔터로 확인',
+  });
+
+  if (!response.personas || response.personas.length === 0) return null;
+
+  return (response.personas as string[])
+    .map((key) => ALL_PERSONAS.find((p) => p.key === key)!)
+    .filter(Boolean);
 }
 
 function resolveAgents(agentArgs?: string[]): string[] | null {

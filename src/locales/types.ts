@@ -25,6 +25,10 @@ export interface Messages {
   enterAgentFilename: string;
   agentRequired: string;
 
+  // persona selection
+  selectPersona: string;
+  personaRequired: string;
+
   // migration
   migrationDetected: string;
 
