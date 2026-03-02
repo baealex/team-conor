@@ -53,6 +53,18 @@ const ALL_PERSONAS: PersonaMeta[] = [
     deepWorkflow: { file: 'deep-server.md', type: 'deep-server',
       desc: '빅토르(backend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
   },
+  {
+    key: 'game', file: 'game.md', role: 'game',
+    label: '레이나 - 게임 클라이언트 개발자',
+    deepWorkflow: { file: 'deep-game.md', type: 'deep-game',
+      desc: '레이나(game)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
+  {
+    key: 'app', file: 'app.md', role: 'app',
+    label: '하루 - 앱 개발자',
+    deepWorkflow: { file: 'deep-app.md', type: 'deep-app',
+      desc: '하루(app)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
 ];
 
 interface InitOptions {
