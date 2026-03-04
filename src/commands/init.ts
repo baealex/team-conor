@@ -14,6 +14,7 @@ const AGENT_MAP: Record<string, string> = {
   claude: 'CLAUDE.md',
   codex: 'AGENTS.md',
 };
+const AGENT_FILENAME_RE = /^(?=.*[A-Za-z0-9])[A-Za-z0-9._-]+\.md$/i;
 
 interface PersonaMeta {
   key: string;
@@ -441,12 +442,26 @@ async function promptPersonaSelection(
 function resolveAgents(agentArgs?: string[]): string[] | null {
   if (!agentArgs || agentArgs.length === 0) return null;
 
-  return agentArgs.map((arg) => {
+  const agents: string[] = [];
+
+  for (const arg of agentArgs) {
     const lower = arg.toLowerCase();
-    if (AGENT_MAP[lower]) return AGENT_MAP[lower];
-    // Custom filename — ensure .md extension
-    return arg.endsWith('.md') ? arg : `${arg}.md`;
-  });
+    if (AGENT_MAP[lower]) {
+      agents.push(AGENT_MAP[lower]);
+      continue;
+    }
+
+    const normalized = normalizeAgentFilename(arg);
+    if (!normalized) {
+      logger.warn(`  invalid agent filename: ${arg} (filename only, no path)`);
+      continue;
+    }
+
+    agents.push(normalized);
+  }
+
+  const uniqueAgents = [...new Set(agents)];
+  return uniqueAgents.length > 0 ? uniqueAgents : null;
 }
 
 async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[] | null> {
@@ -472,17 +487,42 @@ async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[]
         type: 'text',
         name: 'filename',
         message: msg.enterAgentFilename,
-        validate: (value: string) => (value.length > 0 ? true : msg.enterNameValidation),
+        validate: (value: string) => (
+          normalizeAgentFilename(value)
+            ? true
+            : '파일명만 입력하세요 (예: CURSOR.md, 경로 금지)'
+        ),
       });
 
       if (customResponse.filename) {
-        const filename = customResponse.filename as string;
-        agents.push(filename.endsWith('.md') ? filename : `${filename}.md`);
+        const normalized = normalizeAgentFilename(customResponse.filename as string);
+        if (normalized) {
+          agents.push(normalized);
+        }
       }
     } else {
       agents.push(AGENT_MAP[agent]);
     }
   }
 
-  return agents.length > 0 ? agents : null;
+  const uniqueAgents = [...new Set(agents)];
+  return uniqueAgents.length > 0 ? uniqueAgents : null;
+}
+
+function normalizeAgentFilename(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return null;
+
+  const withExt = trimmed.toLowerCase().endsWith('.md') ? trimmed : `${trimmed}.md`;
+
+  // Do not allow path traversal or directory separators.
+  if (withExt.includes('/') || withExt.includes('\\') || withExt.includes('..')) {
+    return null;
+  }
+
+  if (!AGENT_FILENAME_RE.test(withExt)) {
+    return null;
+  }
+
+  return withExt;
 }

@@ -29,18 +29,18 @@ npx team-conor
 
 ```bash
 # 대화형 설정 (기본)
-npx team-conor init
+npx team-conor
 
 # AI 도구 선택 (claude, codex, 또는 커스텀 파일명)
-npx team-conor init --agent claude
-npx team-conor init --agent codex
-npx team-conor init --agent claude codex  # 동시에 여러 도구 지원
+npx team-conor --agent claude
+npx team-conor --agent codex
+npx team-conor --agent claude codex  # 동시에 여러 도구 지원
 
 # 비대화형 모드 (CI/CD 등 인터렉션 불가 환경)
-npx team-conor init --name "홍길동" --agent claude --no-interaction
+npx team-conor --name "홍길동" --agent claude --no-interaction
 
 # 기존 파일 강제 덮어쓰기
-npx team-conor init --name "홍길동" -y
+npx team-conor --name "홍길동" -y
 
 # 도움말 / 버전 확인
 npx team-conor --help
