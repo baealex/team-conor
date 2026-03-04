@@ -14,7 +14,6 @@ const AGENT_MAP: Record<string, string> = {
   claude: 'CLAUDE.md',
   codex: 'AGENTS.md',
 };
-const AGENT_FILENAME_RE = /^(?=.*[A-Za-z0-9])[A-Za-z0-9._-]+\.md$/i;
 
 interface PersonaMeta {
   key: string;
@@ -330,6 +329,7 @@ ${msg.summaryLearnings}
 
   for (const agentFile of selectedAgents) {
     const agentFilePath = path.join(cwd, agentFile);
+    ensureDir(path.dirname(agentFilePath));
     const agentContent = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
 
     const agentBlock = `${agentMarkerStart}\n${agentContent}${AGENT_END}`;
@@ -451,9 +451,9 @@ function resolveAgents(agentArgs?: string[]): string[] | null {
       continue;
     }
 
-    const normalized = normalizeAgentFilename(arg);
+    const normalized = normalizeAgentPath(arg);
     if (!normalized) {
-      logger.warn(`  invalid agent filename: ${arg} (filename only, no path)`);
+      logger.warn(`  invalid agent path: ${arg} (relative path only)`);
       continue;
     }
 
@@ -488,14 +488,14 @@ async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[]
         name: 'filename',
         message: msg.enterAgentFilename,
         validate: (value: string) => (
-          normalizeAgentFilename(value)
+          normalizeAgentPath(value)
             ? true
-            : '파일명만 입력하세요 (예: CURSOR.md, 경로 금지)'
+            : '상대 경로만 입력하세요 (예: CURSOR.md, .cursor/rules/team-conor.mdc)'
         ),
       });
 
       if (customResponse.filename) {
-        const normalized = normalizeAgentFilename(customResponse.filename as string);
+        const normalized = normalizeAgentPath(customResponse.filename as string);
         if (normalized) {
           agents.push(normalized);
         }
@@ -509,20 +509,40 @@ async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[]
   return uniqueAgents.length > 0 ? uniqueAgents : null;
 }
 
-function normalizeAgentFilename(raw: string): string | null {
+function normalizeAgentPath(raw: string): string | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0) return null;
 
-  const withExt = trimmed.toLowerCase().endsWith('.md') ? trimmed : `${trimmed}.md`;
+  const slashNormalized = trimmed.replace(/\\/g, '/');
 
-  // Do not allow path traversal or directory separators.
-  if (withExt.includes('/') || withExt.includes('\\') || withExt.includes('..')) {
+  // Block absolute paths and NUL bytes.
+  if (
+    slashNormalized.includes('\0')
+    || slashNormalized.startsWith('/')
+    || /^[A-Za-z]:/.test(slashNormalized)
+  ) {
     return null;
   }
 
-  if (!AGENT_FILENAME_RE.test(withExt)) {
+  // Allow nested relative paths but block traversal out of project.
+  const posixPath = path.posix.normalize(slashNormalized);
+  if (
+    posixPath === '.'
+    || posixPath === '..'
+    || posixPath.startsWith('../')
+    || posixPath.includes('/../')
+  ) {
     return null;
   }
 
-  return withExt;
+  const segments = posixPath.split('/');
+  if (segments.length === 0) return null;
+
+  for (const segment of segments) {
+    if (segment.length === 0 || segment === '.' || segment === '..') {
+      return null;
+    }
+  }
+
+  return path.join(...segments);
 }
