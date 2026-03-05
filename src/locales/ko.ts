@@ -5,7 +5,8 @@ export const ko: Messages = {
   initTitle: 'Team Conor - AI 팀 페르소나 설정',
   updateDetected: '기존 설정이 감지되었습니다. 업데이트 모드로 진행합니다.',
   nameRequired: '--no-interaction 모드에서는 --name 옵션이 필요합니다.',
-  nameRequiredExample: '  예: team-conor --name "홍길동" --no-interaction --agent claude',
+  nameRequiredExample:
+    '  예: team-conor --name "홍길동" --no-interaction --agent claude',
   enterName: '이름을 입력하세요',
   enterNameValidation: '이름을 입력해주세요',
   cancelled: '취소됨',
@@ -15,7 +16,8 @@ export const ko: Messages = {
   agentFiles: '에이전트 파일:',
   done: '완료!',
   teamIntro: (name: string) => `${name}님의 팀:`,
-  usageHint: (personaName: string) => `사용법: "${personaName}, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요`,
+  usageHint: (personaName: string) =>
+    `사용법: "${personaName}, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요`,
 
   // agent selection
   selectAgent: 'AI 도구를 선택하세요 (스페이스바로 복수 선택)',
@@ -57,12 +59,17 @@ export const ko: Messages = {
 
   // summary.md (Zettelkasten index)
   summaryComment1: 'Zettelkasten 기반 메모리 인덱스',
-  summaryComment2: '이 파일은 항상 AI 컨텍스트에 로드됩니다. 최소한으로 유지하세요.',
-  summaryComment3: '각 항목은 한 줄로, chunks/ 디렉토리의 상세 파일을 참조합니다.',
+  summaryComment2:
+    '이 파일은 항상 AI 컨텍스트에 로드됩니다. 최소한으로 유지하세요.',
+  summaryComment3:
+    '각 항목은 한 줄로, chunks/ 디렉토리의 상세 파일을 참조합니다.',
   summaryComment4: '형식: - [ID](chunks/ID.md) 요약 | #태그',
-  summaryProject: '<!-- [P-ID](chunks/P-ID.md) 형식으로 프로젝트 정보 참조 추가 -->',
-  summaryDecisions: '<!-- [D-ID](chunks/D-ID.md) 형식으로 결정 사항 참조 추가 -->',
-  summaryLearnings: '<!-- [L-ID](chunks/L-ID.md) 형식으로 학습 내용 참조 추가 -->',
+  summaryProject:
+    '<!-- [P-ID](chunks/P-ID.md) 형식으로 프로젝트 정보 참조 추가 -->',
+  summaryDecisions:
+    '<!-- [D-ID](chunks/D-ID.md) 형식으로 결정 사항 참조 추가 -->',
+  summaryLearnings:
+    '<!-- [L-ID](chunks/L-ID.md) 형식으로 학습 내용 참조 추가 -->',
   summaryCreated: '+ summary.md (Zettelkasten index)',
   summaryKept: '- summary.md (기존 유지)',
 
@@ -82,8 +89,11 @@ export const ko: Messages = {
 
   // summary command
   summaryDescription: 'chunks에서 summary.md를 자동 생성합니다',
-  summaryNoChunksDir: '.conor/memory/chunks/ 디렉토리가 없습니다. 먼저 team-conor init을 실행하세요.',
+  summaryNoChunksDir:
+    '.conor/memory/chunks/ 디렉토리가 없습니다. 먼저 team-conor init을 실행하세요.',
   summaryNoChunks: 'chunks 디렉토리에 .md 파일이 없습니다.',
-  summaryNoValidChunks: '유효한 chunk 파일이 없습니다. frontmatter(type, date)를 확인하세요.',
-  summaryGenerated: (count: number) => `summary.md 생성 완료 (${count}개 chunk)`,
+  summaryNoValidChunks:
+    '유효한 chunk 파일이 없습니다. frontmatter(type, date)를 확인하세요.',
+  summaryGenerated: (count: number) =>
+    `summary.md 생성 완료 (${count}개 chunk)`,
 };

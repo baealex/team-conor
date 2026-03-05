@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
-import { createRequire } from 'module';
 import { Command } from 'commander';
+import { createRequire } from 'module';
 import { run as initRun } from './commands/init.js';
 import { run as summaryRun } from './commands/summary.js';
 
 const require = createRequire(import.meta.url);
-const pkg = require('../package.json') as { version: string; description: string };
+const pkg = require('../package.json') as {
+  version: string;
+  description: string;
+};
 
 const program = new Command();
 
@@ -18,7 +21,10 @@ program
   .option('-y, --force', '묻지 않고 덮어쓰기', false)
   .option('--no-interaction', '비대화형 모드 (CI/CD 등)')
   .option('--agent <agents...>', 'AI 도구 선택 (claude, codex, 또는 파일명)')
-  .option('--persona <personas...>', '페르소나 선택 (planner, pm, designer, frontend, backend, game, app, ai)')
+  .option(
+    '--persona <personas...>',
+    '페르소나 선택 (planner, pm, designer, frontend, backend, game, app, ai)',
+  )
   .action(async (options) => {
     await initRun({ ...options, version: pkg.version });
   });

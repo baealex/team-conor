@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import prompts from 'prompts';
-import { log } from './logger.js';
-import { showDiff } from './diff.js';
 import { t } from '../locales/index.js';
+import { showDiff } from './diff.js';
+import { log } from './logger.js';
 
 export interface WriteOptions {
   alwaysAsk?: boolean;
@@ -35,7 +35,11 @@ export async function writeFileWithConfirm(
     if (force) {
       // Non-interactive: force overwrite
     } else if (alwaysAsk) {
-      const action = await confirmOverwrite(path.basename(filePath), oldContent, content);
+      const action = await confirmOverwrite(
+        path.basename(filePath),
+        oldContent,
+        content,
+      );
 
       if (action === 'skip') {
         log(`  - ${path.basename(filePath)} (${msg.skipped})`, 'yellow');
@@ -45,7 +49,10 @@ export async function writeFileWithConfirm(
       if (action === 'backup') {
         const backupPath = `${filePath}.backup`;
         fs.writeFileSync(backupPath, oldContent);
-        log(`  - ${path.basename(filePath)}.backup (${msg.backupCreated})`, 'dim');
+        log(
+          `  - ${path.basename(filePath)}.backup (${msg.backupCreated})`,
+          'dim',
+        );
       }
     }
   }

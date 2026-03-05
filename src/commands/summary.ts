@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import * as logger from '../utils/logger.js';
 import { t } from '../locales/index.js';
+import * as logger from '../utils/logger.js';
 
 interface ChunkMeta {
   id: string;
@@ -32,7 +32,10 @@ function parseFrontmatter(content: string): Record<string, string> {
 function parseTags(raw: string): string[] {
   const match = raw.match(/\[(.*)\]/);
   if (!match) return [];
-  return match[1].split(',').map((t) => t.trim()).filter(Boolean);
+  return match[1]
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 }
 
 function extractSummary(content: string): string {
@@ -60,19 +63,27 @@ function parseChunk(filepath: string): ChunkMeta | null {
 
 function typeToGroup(type: string): string {
   switch (type) {
-    case 'project': return 'Project';
-    case 'decision': return 'Decisions';
-    case 'learning': return 'Learnings';
-    default: return 'Other';
+    case 'project':
+      return 'Project';
+    case 'decision':
+      return 'Decisions';
+    case 'learning':
+      return 'Learnings';
+    default:
+      return 'Other';
   }
 }
 
 function typeOrder(type: string): number {
   switch (type) {
-    case 'project': return 0;
-    case 'decision': return 1;
-    case 'learning': return 2;
-    default: return 3;
+    case 'project':
+      return 0;
+    case 'decision':
+      return 1;
+    case 'learning':
+      return 2;
+    default:
+      return 3;
   }
 }
 
@@ -119,7 +130,7 @@ export async function run(): Promise<void> {
 
   // Sort groups by type order
   const sortedGroups = [...groups.entries()].sort(
-    (a, b) => typeOrder(a[1][0].type) - typeOrder(b[1][0].type)
+    (a, b) => typeOrder(a[1][0].type) - typeOrder(b[1][0].type),
   );
 
   // Generate summary.md
@@ -130,7 +141,9 @@ export async function run(): Promise<void> {
     for (const chunk of items) {
       const tags = chunk.tags.map((t) => `#${t}`).join(' ');
       const tagsPart = tags ? ` | ${tags}` : '';
-      lines.push(`- [${chunk.id}](chunks/${chunk.filename}) ${chunk.summary}${tagsPart} (${chunk.date})`);
+      lines.push(
+        `- [${chunk.id}](chunks/${chunk.filename}) ${chunk.summary}${tagsPart} (${chunk.date})`,
+      );
     }
     lines.push('');
   }
