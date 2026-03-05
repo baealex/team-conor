@@ -12,12 +12,14 @@ interface ChunkMeta {
   summary: string;
 }
 
+const FRONTMATTER_RE = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/;
+
 function parseFrontmatter(content: string): Record<string, string> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(FRONTMATTER_RE);
   if (!match) return {};
 
   const fields: Record<string, string> = {};
-  for (const line of match[1].split('\n')) {
+  for (const line of match[1].split(/\r?\n/)) {
     const colonIndex = line.indexOf(':');
     if (colonIndex === -1) continue;
     const key = line.substring(0, colonIndex).trim();
@@ -34,7 +36,7 @@ function parseTags(raw: string): string[] {
 }
 
 function extractSummary(content: string): string {
-  const afterFrontmatter = content.replace(/^---[\s\S]*?---\n*/, '');
+  const afterFrontmatter = content.replace(/^\uFEFF?---[\s\S]*?---\r?\n*/, '');
   const boldMatch = afterFrontmatter.match(/\*\*[^*]+\*\*:\s*(.+)/);
   return boldMatch ? boldMatch[1].trim() : '';
 }

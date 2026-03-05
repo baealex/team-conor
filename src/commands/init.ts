@@ -329,6 +329,7 @@ ${msg.summaryLearnings}
 
   for (const agentFile of selectedAgents) {
     const agentFilePath = path.join(cwd, agentFile);
+    ensureDir(path.dirname(agentFilePath));
     const agentContent = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
 
     const agentBlock = `${agentMarkerStart}\n${agentContent}${AGENT_END}`;
@@ -441,12 +442,26 @@ async function promptPersonaSelection(
 function resolveAgents(agentArgs?: string[]): string[] | null {
   if (!agentArgs || agentArgs.length === 0) return null;
 
-  return agentArgs.map((arg) => {
+  const agents: string[] = [];
+
+  for (const arg of agentArgs) {
     const lower = arg.toLowerCase();
-    if (AGENT_MAP[lower]) return AGENT_MAP[lower];
-    // Custom filename — ensure .md extension
-    return arg.endsWith('.md') ? arg : `${arg}.md`;
-  });
+    if (AGENT_MAP[lower]) {
+      agents.push(AGENT_MAP[lower]);
+      continue;
+    }
+
+    const normalized = normalizeAgentPath(arg);
+    if (!normalized) {
+      logger.warn(`  invalid agent path: ${arg} (relative path only)`);
+      continue;
+    }
+
+    agents.push(normalized);
+  }
+
+  const uniqueAgents = [...new Set(agents)];
+  return uniqueAgents.length > 0 ? uniqueAgents : null;
 }
 
 async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[] | null> {
@@ -472,17 +487,62 @@ async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[]
         type: 'text',
         name: 'filename',
         message: msg.enterAgentFilename,
-        validate: (value: string) => (value.length > 0 ? true : msg.enterNameValidation),
+        validate: (value: string) => (
+          normalizeAgentPath(value)
+            ? true
+            : '상대 경로만 입력하세요 (예: CURSOR.md, .cursor/rules/team-conor.mdc)'
+        ),
       });
 
       if (customResponse.filename) {
-        const filename = customResponse.filename as string;
-        agents.push(filename.endsWith('.md') ? filename : `${filename}.md`);
+        const normalized = normalizeAgentPath(customResponse.filename as string);
+        if (normalized) {
+          agents.push(normalized);
+        }
       }
     } else {
       agents.push(AGENT_MAP[agent]);
     }
   }
 
-  return agents.length > 0 ? agents : null;
+  const uniqueAgents = [...new Set(agents)];
+  return uniqueAgents.length > 0 ? uniqueAgents : null;
+}
+
+function normalizeAgentPath(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return null;
+
+  const slashNormalized = trimmed.replace(/\\/g, '/');
+
+  // Block absolute paths and NUL bytes.
+  if (
+    slashNormalized.includes('\0')
+    || slashNormalized.startsWith('/')
+    || /^[A-Za-z]:/.test(slashNormalized)
+  ) {
+    return null;
+  }
+
+  // Allow nested relative paths but block traversal out of project.
+  const posixPath = path.posix.normalize(slashNormalized);
+  if (
+    posixPath === '.'
+    || posixPath === '..'
+    || posixPath.startsWith('../')
+    || posixPath.includes('/../')
+  ) {
+    return null;
+  }
+
+  const segments = posixPath.split('/');
+  if (segments.length === 0) return null;
+
+  for (const segment of segments) {
+    if (segment.length === 0 || segment === '.' || segment === '..') {
+      return null;
+    }
+  }
+
+  return path.join(...segments);
 }
