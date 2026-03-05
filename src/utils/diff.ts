@@ -1,7 +1,11 @@
-import { log } from './logger.js';
 import { t } from '../locales/index.js';
+import { log } from './logger.js';
 
-export function showDiff(oldContent: string, newContent: string, filePath: string): void {
+export function showDiff(
+  oldContent: string,
+  newContent: string,
+  filePath: string,
+): void {
   const msg = t();
   const oldLines = oldContent.split('\n');
   const newLines = newContent.split('\n');
@@ -22,7 +26,10 @@ export function showDiff(oldContent: string, newContent: string, filePath: strin
   }
 
   if (oldLines.length > 10 || newLines.length > 10) {
-    log(`  ... (${msg.diffMoreLines(Math.max(oldLines.length, newLines.length) - 10)})`, 'dim');
+    log(
+      `  ... (${msg.diffMoreLines(Math.max(oldLines.length, newLines.length) - 10)})`,
+      'dim',
+    );
   }
   console.log();
 }

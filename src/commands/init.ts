@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import prompts from 'prompts';
-import * as logger from '../utils/logger.js';
-import { writeFileWithConfirm, ensureDir } from '../utils/file.js';
+import { fileURLToPath } from 'url';
 import { t } from '../locales/index.js';
+import { ensureDir, writeFileWithConfirm } from '../utils/file.js';
+import * as logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +15,7 @@ const AGENT_MAP: Record<string, string> = {
   codex: 'AGENTS.md',
 };
 
-interface PersonaMeta {
+export interface PersonaMeta {
   key: string;
   file: string;
   role: string;
@@ -23,53 +23,90 @@ interface PersonaMeta {
   deepWorkflow: { file: string; type: string; desc: string } | null;
 }
 
-const ALL_PERSONAS: PersonaMeta[] = [
+export const ALL_PERSONAS: PersonaMeta[] = [
   {
-    key: 'planner', file: 'planner.md', role: 'planner',
+    key: 'planner',
+    file: 'planner.md',
+    role: 'planner',
     label: '스티브 - 제품 전략가',
-    deepWorkflow: { file: 'deep-plan.md', type: 'deep-plan',
-      desc: '스티브(planner)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-plan.md',
+      type: 'deep-plan',
+      desc: '스티브(planner)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'pm', file: 'pm.md', role: 'pm',
+    key: 'pm',
+    file: 'pm.md',
+    role: 'pm',
     label: '엘런 - 실행 PM',
     deepWorkflow: null,
   },
   {
-    key: 'designer', file: 'designer.md', role: 'designer',
+    key: 'designer',
+    file: 'designer.md',
+    role: 'designer',
     label: '마르코 - UX 전문가',
-    deepWorkflow: { file: 'deep-design.md', type: 'deep-design',
-      desc: '마르코(designer)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-design.md',
+      type: 'deep-design',
+      desc: '마르코(designer)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'frontend', file: 'frontend.md', role: 'frontend',
+    key: 'frontend',
+    file: 'frontend.md',
+    role: 'frontend',
     label: '유나 - FE 아키텍트',
-    deepWorkflow: { file: 'deep-client.md', type: 'deep-client',
-      desc: '유나(frontend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-client.md',
+      type: 'deep-client',
+      desc: '유나(frontend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'backend', file: 'backend.md', role: 'backend',
+    key: 'backend',
+    file: 'backend.md',
+    role: 'backend',
     label: '빅토르 - BE 아키텍트',
-    deepWorkflow: { file: 'deep-server.md', type: 'deep-server',
-      desc: '빅토르(backend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-server.md',
+      type: 'deep-server',
+      desc: '빅토르(backend)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'game', file: 'game.md', role: 'game',
+    key: 'game',
+    file: 'game.md',
+    role: 'game',
     label: '레이나 - 게임 클라이언트 개발자',
-    deepWorkflow: { file: 'deep-game.md', type: 'deep-game',
-      desc: '레이나(game)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-game.md',
+      type: 'deep-game',
+      desc: '레이나(game)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'app', file: 'app.md', role: 'app',
+    key: 'app',
+    file: 'app.md',
+    role: 'app',
     label: '하루 - 앱 개발자',
-    deepWorkflow: { file: 'deep-app.md', type: 'deep-app',
-      desc: '하루(app)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-app.md',
+      type: 'deep-app',
+      desc: '하루(app)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
   {
-    key: 'ai', file: 'ai.md', role: 'ai',
+    key: 'ai',
+    file: 'ai.md',
+    role: 'ai',
     label: '노아 - AI 신뢰성 아키텍트',
-    deepWorkflow: { file: 'deep-ai.md', type: 'deep-ai',
-      desc: '노아(ai)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+    deepWorkflow: {
+      file: 'deep-ai.md',
+      type: 'deep-ai',
+      desc: '노아(ai)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.',
+    },
   },
 ];
 
@@ -99,9 +136,16 @@ export async function run(options: InitOptions): Promise<void> {
   const claudeMdExists = fs.existsSync(claudeMdPath);
   const conorMdExists = fs.existsSync(conorMdPath);
   const oldConorMdExists = fs.existsSync(oldConorMdPath);
-  const needsMigration = claudeMdExists && fs.readFileSync(claudeMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
-  const isUpdate = conorMdExists && fs.readFileSync(conorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
-  const needsConorMove = !conorMdExists && oldConorMdExists && fs.readFileSync(oldConorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
+  const needsMigration =
+    claudeMdExists &&
+    fs.readFileSync(claudeMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
+  const isUpdate =
+    conorMdExists &&
+    fs.readFileSync(conorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
+  const needsConorMove =
+    !conorMdExists &&
+    oldConorMdExists &&
+    fs.readFileSync(oldConorMdPath, 'utf-8').includes('TEAM CONOR TEMPLATE');
 
   if (needsMigration || needsConorMove) {
     logger.warn(msg.migrationDetected);
@@ -125,7 +169,8 @@ export async function run(options: InitOptions): Promise<void> {
       type: 'text',
       name: 'userName',
       message: msg.enterName,
-      validate: (value: string) => (value.length > 0 ? true : msg.enterNameValidation),
+      validate: (value: string) =>
+        value.length > 0 ? true : msg.enterNameValidation,
     });
 
     if (!response.userName) {
@@ -137,12 +182,15 @@ export async function run(options: InitOptions): Promise<void> {
   }
 
   // --- Persona selection ---
-  const hasPersonaArgs = Array.isArray(options.persona) && options.persona.length > 0;
+  const hasPersonaArgs =
+    Array.isArray(options.persona) && options.persona.length > 0;
   let selectedPersonas = resolvePersonas(options.persona);
 
   if (hasPersonaArgs && selectedPersonas && selectedPersonas.length === 0) {
     logger.error(msg.invalidPersona(options.persona!.join(', ')));
-    logger.dim('  사용 가능: planner, pm, designer, frontend, backend, game, app, ai');
+    logger.dim(
+      '  사용 가능: planner, pm, designer, frontend, backend, game, app, ai',
+    );
     process.exit(1);
   }
 
@@ -151,7 +199,11 @@ export async function run(options: InitOptions): Promise<void> {
       // Non-interactive without --persona: select all
       selectedPersonas = ALL_PERSONAS;
     } else {
-      selectedPersonas = await promptPersonaSelection(msg, cwd, isUpdate || needsMigration || needsConorMove);
+      selectedPersonas = await promptPersonaSelection(
+        msg,
+        cwd,
+        isUpdate || needsMigration || needsConorMove,
+      );
 
       if (!selectedPersonas || selectedPersonas.length === 0) {
         logger.warn(msg.cancelled);
@@ -186,7 +238,8 @@ export async function run(options: InitOptions): Promise<void> {
   ensureDir(path.join(cwd, '.conor', 'workflows'));
 
   const writeOpts = {
-    alwaysAsk: (isUpdate || needsMigration || needsConorMove) && options.interaction,
+    alwaysAsk:
+      (isUpdate || needsMigration || needsConorMove) && options.interaction,
     force: options.force,
   };
 
@@ -203,7 +256,10 @@ export async function run(options: InitOptions): Promise<void> {
     await writeFileWithConfirm(dest, content, writeOpts);
   }
 
-  const userTemplate = fs.readFileSync(path.join(templatesDir, 'persona', 'user.md'), 'utf-8');
+  const userTemplate = fs.readFileSync(
+    path.join(templatesDir, 'persona', 'user.md'),
+    'utf-8',
+  );
   const userContent = userTemplate.replace(/\{\{userName\}\}/g, userName);
   await writeFileWithConfirm(
     path.join(cwd, '.conor', 'persona', 'user.md'),
@@ -273,12 +329,16 @@ ${msg.summaryLearnings}
   logger.newline();
   logger.info(msg.conorMd);
 
-  const conorTemplate = fs.readFileSync(path.join(templatesDir, 'CONOR.md'), 'utf-8');
+  const conorTemplate = fs.readFileSync(
+    path.join(templatesDir, 'CONOR.md'),
+    'utf-8',
+  );
 
   // Build personas block
-  const personasBlock = selectedPersonas
-    .map((p) => `    <persona role="${p.role}">${p.label}</persona>`)
-    .join('\n') + '\n';
+  const personasBlock =
+    selectedPersonas
+      .map((p) => `    <persona role="${p.role}">${p.label}</persona>`)
+      .join('\n') + '\n';
 
   // Build deep-workflows block
   const deepWorkflowLines = selectedPersonas
@@ -287,9 +347,8 @@ ${msg.summaryLearnings}
       const dw = p.deepWorkflow!;
       return `    <workflow type="${dw.type}" file=".conor/workflows/${dw.file}">\n        ${dw.desc}\n    </workflow>`;
     });
-  const deepWorkflows = deepWorkflowLines.length > 0
-    ? deepWorkflowLines.join('\n') + '\n'
-    : '';
+  const deepWorkflows =
+    deepWorkflowLines.length > 0 ? deepWorkflowLines.join('\n') + '\n' : '';
 
   const renderedTemplate = conorTemplate
     .replace(/\{\{userName\}\}/g, userName)
@@ -312,7 +371,10 @@ ${msg.summaryLearnings}
       logger.success(`  + .conor/CONOR.md (${msg.templateRegionUpdated})`);
 
       // Replace the template region in CLAUDE.md with agent region
-      const agentTemplate = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
+      const agentTemplate = fs.readFileSync(
+        path.join(templatesDir, 'agents', 'agent.md'),
+        'utf-8',
+      );
       const AGENT_START = `<!-- TEAM CONOR AGENT v${options.version} -->`;
       const AGENT_END = '<!-- END TEAM CONOR AGENT -->';
       const agentBlock = `${AGENT_START}\n${agentTemplate}${AGENT_END}`;
@@ -329,7 +391,16 @@ ${msg.summaryLearnings}
     fs.unlinkSync(oldConorMdPath);
     logger.success(`  + .conor/CONOR.md (${msg.templateRegionUpdated})`);
   } else {
-    writeMarkerRegion(conorMdPath, templateBlock, TEMPLATE_START_RE, TEMPLATE_END, '.conor/CONOR.md', msg.templateRegionUpdated, msg.templateRegionNoChange, writeOpts);
+    writeMarkerRegion(
+      conorMdPath,
+      templateBlock,
+      TEMPLATE_START_RE,
+      TEMPLATE_END,
+      '.conor/CONOR.md',
+      msg.templateRegionUpdated,
+      msg.templateRegionNoChange,
+      writeOpts,
+    );
   }
 
   // --- Agent files ---
@@ -343,7 +414,10 @@ ${msg.summaryLearnings}
   for (const agentFile of selectedAgents) {
     const agentFilePath = path.join(cwd, agentFile);
     ensureDir(path.dirname(agentFilePath));
-    const agentContent = fs.readFileSync(path.join(templatesDir, 'agents', 'agent.md'), 'utf-8');
+    const agentContent = fs.readFileSync(
+      path.join(templatesDir, 'agents', 'agent.md'),
+      'utf-8',
+    );
 
     const agentBlock = `${agentMarkerStart}\n${agentContent}${AGENT_END}`;
 
@@ -352,7 +426,16 @@ ${msg.summaryLearnings}
       continue;
     }
 
-    writeMarkerRegion(agentFilePath, agentBlock, AGENT_START_RE, AGENT_END, agentFile, msg.agentRegionUpdated, msg.agentRegionNoChange, writeOpts);
+    writeMarkerRegion(
+      agentFilePath,
+      agentBlock,
+      AGENT_START_RE,
+      AGENT_END,
+      agentFile,
+      msg.agentRegionUpdated,
+      msg.agentRegionNoChange,
+      writeOpts,
+    );
   }
 
   // --- Done ---
@@ -362,11 +445,15 @@ ${msg.summaryLearnings}
   logger.info(msg.teamIntro(userName));
   const personaLabels = selectedPersonas.map((p) => p.label);
   for (let i = 0; i < personaLabels.length; i += 3) {
-    const line = personaLabels.slice(i, i + 3).map((l) => l).join(' | ');
+    const line = personaLabels
+      .slice(i, i + 3)
+      .map((l) => l)
+      .join(' | ');
     logger.dim(`  ${line}`);
   }
   logger.newline();
-  const usagePersonaName = selectedPersonas[0]?.label.split(' - ')[0] ?? '스티브';
+  const usagePersonaName =
+    selectedPersonas[0]?.label.split(' - ')[0] ?? '스티브';
   logger.dim(msg.usageHint(usagePersonaName));
   logger.newline();
 }
@@ -432,9 +519,8 @@ async function promptPersonaSelection(
   isUpdate: boolean,
 ): Promise<PersonaMeta[] | null> {
   const personaDir = path.join(cwd, '.conor', 'persona');
-  const existingFiles = isUpdate && fs.existsSync(personaDir)
-    ? fs.readdirSync(personaDir)
-    : [];
+  const existingFiles =
+    isUpdate && fs.existsSync(personaDir) ? fs.readdirSync(personaDir) : [];
 
   const response = await prompts({
     type: 'multiselect',
@@ -480,7 +566,9 @@ function resolveAgents(agentArgs?: string[]): string[] | null {
   return uniqueAgents.length > 0 ? uniqueAgents : null;
 }
 
-async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[] | null> {
+async function promptAgentSelection(
+  msg: ReturnType<typeof t>,
+): Promise<string[] | null> {
   const response = await prompts({
     type: 'multiselect',
     name: 'agents',
@@ -503,15 +591,16 @@ async function promptAgentSelection(msg: ReturnType<typeof t>): Promise<string[]
         type: 'text',
         name: 'filename',
         message: msg.enterAgentFilename,
-        validate: (value: string) => (
+        validate: (value: string) =>
           normalizeAgentPath(value)
             ? true
-            : '상대 경로만 입력하세요 (예: CURSOR.md, .cursor/rules/team-conor.mdc)'
-        ),
+            : '상대 경로만 입력하세요 (예: CURSOR.md, .cursor/rules/team-conor.mdc)',
       });
 
       if (customResponse.filename) {
-        const normalized = normalizeAgentPath(customResponse.filename as string);
+        const normalized = normalizeAgentPath(
+          customResponse.filename as string,
+        );
         if (normalized) {
           agents.push(normalized);
         }
@@ -533,9 +622,9 @@ function normalizeAgentPath(raw: string): string | null {
 
   // Block absolute paths and NUL bytes.
   if (
-    slashNormalized.includes('\0')
-    || slashNormalized.startsWith('/')
-    || /^[A-Za-z]:/.test(slashNormalized)
+    slashNormalized.includes('\0') ||
+    slashNormalized.startsWith('/') ||
+    /^[A-Za-z]:/.test(slashNormalized)
   ) {
     return null;
   }
@@ -543,10 +632,10 @@ function normalizeAgentPath(raw: string): string | null {
   // Allow nested relative paths but block traversal out of project.
   const posixPath = path.posix.normalize(slashNormalized);
   if (
-    posixPath === '.'
-    || posixPath === '..'
-    || posixPath.startsWith('../')
-    || posixPath.includes('/../')
+    posixPath === '.' ||
+    posixPath === '..' ||
+    posixPath.startsWith('../') ||
+    posixPath.includes('/../')
   ) {
     return null;
   }

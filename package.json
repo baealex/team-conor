@@ -13,8 +13,11 @@
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",
+        "lint": "biome check src/",
+        "lint:fix": "biome check --write src/",
         "test": "vitest run --exclude dist",
         "prepublishOnly": "npm run build",
+        "postinstall": "lefthook install || true",
         "clean": "rm -rf dist"
     },
     "keywords": [
@@ -48,8 +51,10 @@
         "prompts": "^2.4.2"
     },
     "devDependencies": {
+        "@biomejs/biome": "^2.0.0",
         "@types/node": "^25.2.1",
         "@types/prompts": "^2.4.9",
+        "lefthook": "^1.11.0",
         "typescript": "^5.9.3",
         "vitest": "^4.0.18"
     }
