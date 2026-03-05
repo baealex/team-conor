@@ -359,7 +359,8 @@ ${msg.summaryLearnings}
     logger.dim(`  ${line}`);
   }
   logger.newline();
-  logger.dim(msg.usageHint);
+  const usagePersonaName = selectedPersonas[0]?.label.split(' - ')[0] ?? '스티브';
+  logger.dim(msg.usageHint(usagePersonaName));
   logger.newline();
 }
 

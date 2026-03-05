@@ -15,9 +15,7 @@ export const ko: Messages = {
   agentFiles: '에이전트 파일:',
   done: '완료!',
   teamIntro: (name: string) => `${name}님의 팀:`,
-  teamMembers1: '  스티브 (제품 전략) | 엘런 (실행 PM) | 마르코 (UX)',
-  teamMembers2: '  유나 (Frontend)   | 빅토르 (Backend) | 노아 (AI Reliability)',
-  usageHint: '사용법: "유나, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요',
+  usageHint: (personaName: string) => `사용법: "${personaName}, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요`,
 
   // agent selection
   selectAgent: 'AI 도구를 선택하세요 (스페이스바로 복수 선택)',

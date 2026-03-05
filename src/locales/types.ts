@@ -13,9 +13,7 @@ export interface Messages {
   agentFiles: string;
   done: string;
   teamIntro: (name: string) => string;
-  teamMembers1: string;
-  teamMembers2: string;
-  usageHint: string;
+  usageHint: (personaName: string) => string;
 
   // agent selection
   selectAgent: string;
