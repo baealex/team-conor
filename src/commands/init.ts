@@ -65,6 +65,12 @@ const ALL_PERSONAS: PersonaMeta[] = [
     deepWorkflow: { file: 'deep-app.md', type: 'deep-app',
       desc: '하루(app)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
   },
+  {
+    key: 'ai', file: 'ai.md', role: 'ai',
+    label: '노아 - AI 신뢰성 아키텍트',
+    deepWorkflow: { file: 'deep-ai.md', type: 'deep-ai',
+      desc: '노아(ai)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
 ];
 
 interface InitOptions {
@@ -131,7 +137,14 @@ export async function run(options: InitOptions): Promise<void> {
   }
 
   // --- Persona selection ---
+  const hasPersonaArgs = Array.isArray(options.persona) && options.persona.length > 0;
   let selectedPersonas = resolvePersonas(options.persona);
+
+  if (hasPersonaArgs && selectedPersonas && selectedPersonas.length === 0) {
+    logger.error(msg.invalidPersona(options.persona!.join(', ')));
+    logger.dim('  사용 가능: planner, pm, designer, frontend, backend, game, app, ai');
+    process.exit(1);
+  }
 
   if (!selectedPersonas) {
     if (!options.interaction) {
@@ -353,7 +366,8 @@ ${msg.summaryLearnings}
     logger.dim(`  ${line}`);
   }
   logger.newline();
-  logger.dim(msg.usageHint);
+  const usagePersonaName = selectedPersonas[0]?.label.split(' - ')[0] ?? '스티브';
+  logger.dim(msg.usageHint(usagePersonaName));
   logger.newline();
 }
 
@@ -402,12 +416,14 @@ function resolvePersonas(personaArgs?: string[]): PersonaMeta[] | null {
   for (const arg of personaArgs) {
     const found = ALL_PERSONAS.find((p) => p.key === arg.toLowerCase());
     if (found) {
-      result.push(found);
+      if (!result.some((p) => p.key === found.key)) {
+        result.push(found);
+      }
     } else {
       logger.warn(`  unknown persona: ${arg}`);
     }
   }
-  return result.length > 0 ? result : null;
+  return result;
 }
 
 async function promptPersonaSelection(
