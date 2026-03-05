@@ -13,6 +13,7 @@ labels: [work, persona, memory]
 - 마르코 (designer): .conor/persona/designer.md
 - 유나 (frontend): .conor/persona/frontend.md
 - 빅토르 (backend): .conor/persona/backend.md
+- 노아 (ai): .conor/persona/ai.md
 
 ### 활성화
 - "{이름}아", "{이름}," 호출 → 해당 페르소나 파일만 읽고 그 관점에서 응답

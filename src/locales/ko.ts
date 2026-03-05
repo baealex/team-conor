@@ -16,7 +16,7 @@ export const ko: Messages = {
   done: '완료!',
   teamIntro: (name: string) => `${name}님의 팀:`,
   teamMembers1: '  스티브 (제품 전략) | 엘런 (실행 PM) | 마르코 (UX)',
-  teamMembers2: '  유나 (Frontend)   | 빅토르 (Backend)',
+  teamMembers2: '  유나 (Frontend)   | 빅토르 (Backend) | 노아 (AI Reliability)',
   usageHint: '사용법: "유나, 이 코드 리뷰해줘" 처럼 팀원을 호출하세요',
 
   // agent selection

@@ -65,6 +65,12 @@ const ALL_PERSONAS: PersonaMeta[] = [
     deepWorkflow: { file: 'deep-app.md', type: 'deep-app',
       desc: '하루(app)에게 심층적인 분석을 명시적으로 요청한 경우에만 읽으세요.' },
   },
+  {
+    key: 'ai', file: 'ai.md', role: 'ai',
+    label: '노아 - AI 신뢰성 아키텍트',
+    deepWorkflow: { file: 'deep-ai.md', type: 'deep-ai',
+      desc: '노아(ai)에게 프롬프트 엔지니어링과 AI 신뢰성(재현성/평가/복구) 분석을 명시적으로 요청한 경우에만 읽으세요.' },
+  },
 ];
 
 interface InitOptions {
