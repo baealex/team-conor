@@ -137,7 +137,14 @@ export async function run(options: InitOptions): Promise<void> {
   }
 
   // --- Persona selection ---
+  const hasPersonaArgs = Array.isArray(options.persona) && options.persona.length > 0;
   let selectedPersonas = resolvePersonas(options.persona);
+
+  if (hasPersonaArgs && selectedPersonas && selectedPersonas.length === 0) {
+    logger.error(msg.invalidPersona(options.persona!.join(', ')));
+    logger.dim('  사용 가능: planner, pm, designer, frontend, backend, game, app, ai');
+    process.exit(1);
+  }
 
   if (!selectedPersonas) {
     if (!options.interaction) {
@@ -409,12 +416,14 @@ function resolvePersonas(personaArgs?: string[]): PersonaMeta[] | null {
   for (const arg of personaArgs) {
     const found = ALL_PERSONAS.find((p) => p.key === arg.toLowerCase());
     if (found) {
-      result.push(found);
+      if (!result.some((p) => p.key === found.key)) {
+        result.push(found);
+      }
     } else {
       logger.warn(`  unknown persona: ${arg}`);
     }
   }
-  return result.length > 0 ? result : null;
+  return result;
 }
 
 async function promptPersonaSelection(

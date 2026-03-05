@@ -26,6 +26,7 @@ export interface Messages {
   // persona selection
   selectPersona: string;
   personaRequired: string;
+  invalidPersona: (input: string) => string;
 
   // migration
   migrationDetected: string;

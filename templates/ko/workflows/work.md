@@ -13,6 +13,8 @@ labels: [work, persona, memory]
 - 마르코 (designer): .conor/persona/designer.md
 - 유나 (frontend): .conor/persona/frontend.md
 - 빅토르 (backend): .conor/persona/backend.md
+- 레이나 (game): .conor/persona/game.md
+- 하루 (app): .conor/persona/app.md
 - 노아 (ai): .conor/persona/ai.md
 
 ### 활성화

@@ -28,6 +28,7 @@ export const ko: Messages = {
   // persona selection
   selectPersona: '페르소나를 선택하세요 (스페이스바로 복수 선택)',
   personaRequired: '--no-interaction 모드에서는 --persona 옵션이 필요합니다.',
+  invalidPersona: (input: string) => `유효한 --persona 값이 없습니다: ${input}`,
 
   // migration
   migrationDetected: '기존 CLAUDE.md에서 CONOR.md 마이그레이션을 진행합니다.',
